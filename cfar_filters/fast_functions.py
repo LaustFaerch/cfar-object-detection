@@ -57,4 +57,23 @@ def fast_edge_mean(x):
 def fast_edge_std(x):
     return _edge_kernel_std(x)
 
+# 4-connected only, change if we use 8-connected objects
+@nb.stencil( neighborhood = ((-1, 1),(-1, 1)))
+def _count_connected(x):
+    cumul = 0
+    for i in range(-1,2):
+        if i!=0:
+            cumul += x[i,0]*1
+            cumul += x[0,i]*1
+    return cumul
 
+@nb.jit('int8(boolean[:,:])', parallel=True, nopython=True)
+def total_connections(x):
+    return nb.int8(np.sum(_count_connected(x)*x)/2)
+
+
+# calculate the outer perimeter of a binary object
+def outer_perimeter(regionmask):
+    N = np.sum(regionmask)
+    C = total_connections(np.pad(regionmask, pad_width=1))
+    return np.int8(4*N-2*C)
