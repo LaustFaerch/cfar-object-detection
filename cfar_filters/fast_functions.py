@@ -50,18 +50,18 @@ def _edge_kernel_std(x,m):
         return nb.float32(np.nan)
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_center_mean(x):
-    return _center_kernel_mean(x)
+def fast_center_mean(x,m):
+    return _center_kernel_mean(x,m)
 
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_edge_mean(x):
-    return _edge_kernel_mean(x)
+def fast_edge_mean(x,m):
+    return _edge_kernel_mean(x,m)
 
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_edge_std(x):
-    return _edge_kernel_std(x)
+def fast_edge_std(x,m):
+    return _edge_kernel_std(x,m)
 
 # 4-connected only, change if we use 8-connected objects
 @nb.stencil( neighborhood = ((-1, 1),(-1, 1)))
