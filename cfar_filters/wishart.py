@@ -36,7 +36,7 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
         -  Objects embedded in rough sea ice is hard to detect
     TODO:
         -  Handle NaNs in the area near icebergs (e.g. from landmask)
-        -  Maybe ENL should be an input parameter?
+
     Parameters:
     ----------
     img : numpy.ndarray(float32) (K,X,Y)
