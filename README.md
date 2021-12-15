@@ -1,3 +1,3 @@
-# cfar-object-detection
+# cfar-object-detection :mag:
 
-:microscope:
+
