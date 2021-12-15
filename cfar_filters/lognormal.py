@@ -23,12 +23,13 @@ def detector(image, mask=0, pfa=1e-6):
         mask = np.ones_like(image[0, ...]) > 0
 
     image = image.squeeze()
-    # Define filter parameters
+    image = (image - np.mean(image)) / np.std(image)
+
     std_dev_multiplier = _find_gaussian_multiplier(pfa)
 
     edge_mean = fast_edge_mean(image, mask)
     egde_std = fast_edge_std(image, mask)
 
-    outliers = (edge_mean + std_dev_multiplier * egde_std)
+    outliers = image - (edge_mean + std_dev_multiplier * egde_std) > 0
 
     return outliers
