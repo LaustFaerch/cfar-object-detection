@@ -98,5 +98,5 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     outliers = (1 - P) <= pfa
 
     # we are only interested in bright outliers
-    bright_filter = (S11_o / m < S11_s / n) | (S22_o / m < S22_s / n)
+    bright_filter = (S11_o / m < S11_s / n) & (S22_o / m < S22_s / n)
     return (outliers * bright_filter)
