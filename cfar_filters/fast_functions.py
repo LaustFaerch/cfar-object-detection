@@ -1,51 +1,61 @@
 
+"""
+Fast convolutions using NUMBA
+
+Kernel sizes made for 40 meter SAR images
+Inner window of 7 (~280m)
+Outer window of 13 (~520m)
+This corresponds to totally 13**2 - 7**2 = 120 pixels in outer window
+
+"""
+
 import numpy as np
 import numba as nb
 
-# Corresponding to inner_window_size==5
-@nb.stencil( neighborhood = ((-2, 2),(-2, 2)))
+# Corresponding to inner_window_size==7
+@nb.stencil( neighborhood = ((-3, 3),(-3, 3)))
 def _center_kernel_mean(x,m):
     if m[0, 0]:
         cumul = 0
-        for i in range(-2,3):
-            for ii in range(-2,3):
+        for i in range(-3,3):
+            for ii in range(-3,4):
                 cumul += x[i,ii]
-        return nb.float32(cumul / 25)
+        return nb.float32(cumul / 49)
     else:
         return nb.float32(np.nan)
 
-# Corresponding to outer_window_size==21
-@nb.stencil( neighborhood = ((-10, 10),(-10, 10)))
+# Corresponding to outer_window_size==13
+@nb.stencil( neighborhood = ((-6, 6),(-6, 6)))
 def _edge_kernel_mean(x,m):
     if m[0, 0]:
         cumul = 0
-        for i in range(-10,11):
-            for ii in range(-10,11):
-                # Corresponding to middle_window_size==15
-                if (i<=-7 or i>=7) or (ii<=-7 or ii>=7):
+        for i in range(-6,7):
+            for ii in range(-6,7):
+                # Corresponding to inner_window_size==7
+                if (i<=-3 or i>=3) or (ii<=-3 or ii>=3):
                     cumul += x[i,ii]
-        return nb.float32(cumul / 216)
+        return nb.float32(cumul / 120)
     else:
         return nb.float32(np.nan)
 
-# Corresponding to outer_window_size==21
-@nb.stencil( neighborhood = ((-10, 11),(-10, 11)))
+# Corresponding to outer_window_size==13
+@nb.stencil( neighborhood = ((-6, 6),(-6, 6)))
 def _edge_kernel_std(x,m):
     if m[0, 0]:
         cumul = 0
-        for i in range(-10,11):
-            for ii in range(-10,11):
-                # Corresponding to middle_window_size==15
-                if (i<=-7 or i>=7) or (ii<=-7 or ii>=7):
+        for i in range(-6,7):
+            for ii in range(-6,7):
+                # Corresponding to inner_window_size==7
+                if (i<=-3 or i>=3) or (ii<=-3 or ii>=3):
                     cumul += x[i,ii]
-        mean = nb.float32(cumul / 216)
+        mean = nb.float32(cumul / 120)
 
         cumul = 0
-        for i in range(-10,11):
-            for ii in range(-10,11):
-                if (i<=-7 or i>=7) or (ii<=-7 or ii>=7):
+        for i in range(-6,7):
+            for ii in range(-6,7):
+                if (i<=-3 or i>=3) or (ii<=-3 or ii>=3):
                     cumul += (x[i,ii]-mean)**2
-        return nb.float32(np.sqrt(cumul/215))
+        return nb.float32(np.sqrt(cumul/120))
     else:
         return nb.float32(np.nan)
 
@@ -57,7 +67,6 @@ def fast_center_mean(x,m):
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
 def fast_edge_mean(x,m):
     return _edge_kernel_mean(x,m)
-
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
 def fast_edge_std(x,m):
@@ -76,7 +85,6 @@ def _count_connected(x):
 @nb.jit('int8(boolean[:,:])', parallel=True, nopython=True)
 def total_connections(x):
     return nb.int8(np.sum(_count_connected(x)*x)/2)
-
 
 # calculate the outer perimeter of a binary object
 def outer_perimeter(regionmask):
