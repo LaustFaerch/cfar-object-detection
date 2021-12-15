@@ -22,11 +22,6 @@ def detector(image, mask=0, pfa=1e-6):
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    # check if the image format
-    if smells_like(image) != 'decibel':
-        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image)}',
-                      category=UserWarning)
-
     image = image.squeeze()
     # Define filter parameters
     std_dev_multiplier = _find_gaussian_multiplier(pfa)

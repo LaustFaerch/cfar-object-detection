@@ -22,7 +22,7 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     K. Conradsen, A. A. Nielsen, J. Schou, and H. Skriver,
     “A test statistic in the complex wishart distribution and its application
     to change detection in polarimetric SAR data,”
-    IEEE Trans. Geosci. Remote Sens., vol. 41, no. 1, pp. 4–19, 2003, doi: 10.1109/TGRS.2002.808066.
+    IEEE Trans. Geosci. Remote Sens., vol. 41, no. 1, pp. 4-19, 2003, doi: 10.1109/TGRS.2002.808066.
     At the moment, the filter is only suitable for Sentinel-1 EW GRDM!
     T have been found empirically. Generally suitable values are around 3e4 - 3.5e4
     Suitable ENL values can be found here:
