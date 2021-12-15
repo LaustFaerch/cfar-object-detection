@@ -36,6 +36,7 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
         -  Objects embedded in rough sea ice is hard to detect
     TODO:
         -  Handle NaNs in the area near icebergs (e.g. from landmask)
+        - Maybe make a check function to avoid copying all the checks
 
     Parameters:
     ----------
@@ -46,9 +47,6 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     ----------
     outliers : numpy.ndarray(bool) (X,Y)
     """
-
-    # TODO: Maybe make a check function to avoid copying all the checks
-    # should include format, shape/size, mask etc.
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
