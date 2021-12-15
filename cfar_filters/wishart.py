@@ -74,14 +74,14 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
 
     n = 1 * enl     # no looks center pixel
     m = 120 * enl   # no looks edge cell
-    p = 2           # no dimensions (bands) in image    
+    p = 2           # no dimensions (bands) in image
 
     eps = db2in(-100)   # just a small value
 
-    S11_s = np.where(mask, n * image[0, ...], np.nan) # S11 Ship
-    S22_s = np.where(mask, n * image[1, ...], np.nan) # S22 Ship
-    S11_o = m * fast_edge_mean(image[0, ...], mask) # S11 Ocean
-    S22_o = m * fast_edge_mean(image[1, ...], mask) # S22 Ocean
+    S11_s = np.where(mask, n * image[0, ...], np.nan)  # S11 Ship
+    S22_s = np.where(mask, n * image[1, ...], np.nan)  # S22 Ship
+    S11_o = m * fast_edge_mean(image[0, ...], mask)  # S11 Ocean
+    S22_o = m * fast_edge_mean(image[1, ...], mask)  # S22 Ocean
 
     S11_o = np.where(S11_o == 0, eps, S11_o)
     S22_o = np.where(S22_o == 0, eps, S22_o)
