@@ -1,7 +1,7 @@
 import numpy as np
 from .fast_functions import fast_edge_mean
 
-def transform(image, mask=0, pfa=1e-6):
+def transform(image, mask=0):
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
