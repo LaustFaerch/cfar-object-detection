@@ -12,12 +12,12 @@ def transform(image, mask=0):
     eps = db2in(-100)
 
     #  HV_test = fast_center_mean(image[1, ...], mask)
-    HV_test = image[1, ...]  # just testing what happens now
+    HV_test = image[1, ...]  # this appears better than ^that
     HV_train = fast_edge_mean(image[1, ...], mask)
     HH_train = fast_edge_mean(image[0, ...], mask)
 
-    Δ = (HV_test - HV_train) / (HH_train + eps) > HV_test
+    Δ = (HV_test - HV_train) / (HH_train + eps)
 
-    detection_image = (Δ * image[1, ...]**2 + eps)
+    detection_image = (Δ * HV_test)
 
     return detection_image
