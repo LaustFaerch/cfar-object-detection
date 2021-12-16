@@ -3,7 +3,7 @@ from rs_utils.sar_functions import db2in
 from .fast_functions import fast_edge_mean, fast_center_mean
 
 
-def transform(image, mask=0, pfa=1e-6):
+def transform(image, mask=0):
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
@@ -11,9 +11,9 @@ def transform(image, mask=0, pfa=1e-6):
 
     eps = db2in(-100)
 
-    HV_test = fast_center_mean(image[1, ...],)
-    HV_train = fast_edge_mean(image[1, ...])
-    HH_train = fast_edge_mean(image[0, ...])
+    HV_test = fast_center_mean(image[1, ...], mask)
+    HV_train = fast_edge_mean(image[1, ...], mask)
+    HH_train = fast_edge_mean(image[0, ...], mask)
 
     Δ = (HV_test - HV_train) / (HH_train + eps) > HV_test
 
