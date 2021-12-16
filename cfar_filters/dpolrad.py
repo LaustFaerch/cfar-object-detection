@@ -16,8 +16,8 @@ def transform(image, mask=0):
     HV_train = fast_edge_mean(image[1, ...], mask)
     HH_train = fast_edge_mean(image[0, ...], mask)
 
-    Δ = (HV_test - HV_train) / (HH_train + eps)
+    Δ = (HV_test - HV_train) / (HH_train)
 
     detection_image = (Δ * HV_test)
 
-    return detection_image
+    return Δ
