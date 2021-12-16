@@ -1,5 +1,4 @@
 import numpy as np
-
 from scipy.special import gamma, kn
 import scipy.integrate as integrate
 from scipy.optimize import fmin
@@ -25,10 +24,10 @@ def k_pdf(x, μ, v, L):
     return pdf
 
 # wrapper for the integration function
-# the function becomes numerically instable when L and v are floating
+# the function becomes numerically instable when enl and v are floating
 # I dont know what causes this, but choose to round as that seems like the best approach
-# def _k_integration(I, μ, v, L):
-#     return k_pdf(I, μ, np.round(v), np.round(L))
+# def _k_integration(I, μ, v, enl):
+#     return k_pdf(I, μ, np.round(v), np.round(enl))
 
 # Numerical integration of the k-distribution using scipy.integrate
 def _k_minimize(t, μ, v, L, pde):
@@ -47,13 +46,19 @@ def _k_params(image, L):
 
 # K-distribution CFAR on image blocks
 def _kd_cfar(image, μ, v, L, pde):
-    init = 5 * μ  # initial guess of the algorithm - set empirically
+    init = 5 * μ  # initial guess of the algorithm
     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
+#     print('T',T)
     outliers = image > T
     return outliers
 
 
 def detector(image, N=500, pfa=1e-12, L=np.nan):
+
+    # if we dont have L, use ENL estimation
+    est_enl_flag = False
+    if np.isnan(L):
+        est_enl_flag = True
 
     outliers = np.zeros_like(image).astype(np.bool)
     pde = 1 - (pfa)  # probability of detection
@@ -66,8 +71,7 @@ def detector(image, N=500, pfa=1e-12, L=np.nan):
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
             sub_block_image = sub_block_image - np.nanmin(sub_block_image)  # make sure posistive
 
-            # if we dont have L, use ENL estimation
-            if np.isnan(L):
+            if est_enl_flag:
                 L = np.nanmean(sub_block_image)**2 / np.nanvar(sub_block_image)
 
             μ, v = _k_params(sub_block_image, L)
