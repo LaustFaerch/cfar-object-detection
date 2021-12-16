@@ -2,6 +2,12 @@ import numpy as np
 from rs_utils.sar_functions import db2in
 from .fast_functions import fast_edge_mean, fast_center_mean
 
+def _mask_edges(image, N):
+    image[0:N, :] = np.nan
+    image[:, 0:N] = np.nan
+    image[-N:, :] = np.nan
+    image[:, -N:] = np.nan
+    return image
 
 def transform(image, mask=0):
 
@@ -12,12 +18,11 @@ def transform(image, mask=0):
     eps = db2in(-100)  # small number
 
     HV_test = fast_center_mean(image[1, ...], mask)
-    #  HV_test = image[1, ...]  # this appears better than ^that
     HV_train = fast_edge_mean(image[1, ...], mask)
     HH_train = fast_edge_mean(image[0, ...], mask)
 
     Δ = (HV_test - HV_train) / (HH_train + eps)
 
-    detection_image = (Δ * HV_test)
+    Δ = _mask_edges(Δ, 6)
 
     return Δ
