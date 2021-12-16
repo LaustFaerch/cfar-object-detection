@@ -30,6 +30,6 @@ def detector(image, mask=0, pfa=1e-6):
     edge_mean = fast_edge_mean(image, mask)
     egde_std = fast_edge_std(image, mask)
 
-    outliers = image - (edge_mean + std_dev_multiplier * egde_std) > 0
+    outliers = (image - (edge_mean + std_dev_multiplier * egde_std)) > 0
 
     return outliers
