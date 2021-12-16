@@ -9,10 +9,10 @@ def transform(image, mask=0):
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    eps = db2in(-100) # small number
+    eps = db2in(-100)  # small number
 
-    #  HV_test = fast_center_mean(image[1, ...], mask)
-    HV_test = image[1, ...]  # this appears better than ^that
+    HV_test = fast_center_mean(image[1, ...], mask)
+    #  HV_test = image[1, ...]  # this appears better than ^that
     HV_train = fast_edge_mean(image[1, ...], mask)
     HH_train = fast_edge_mean(image[0, ...], mask)
 
