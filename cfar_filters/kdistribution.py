@@ -89,17 +89,20 @@ def detector(image, N=100, pfa=1e-12):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
-            # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
-            μ, v, L = _mom_estimation_full(sub_block_image)
+            if np.all(np.isnan(sub_block_image)):
+                outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
+            else:
+                # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
+                μ, v, L = _mom_estimation_full(sub_block_image)
 
-            # if the mom estimation fails, use a simpler estimation
-            if np.any(np.isnan(np.array([v, L]))):
-                μ, v, L = _mom_estimation_simple(sub_block_image)
+                # if the mom estimation fails, use a simpler estimation
+                if np.any(np.isnan(np.array([v, L]))):
+                    μ, v, L = _mom_estimation_simple(sub_block_image)
 
-            if v <= vmin or v >= vmax:
-                v = vmax
-            L = min(max(Lmin, L), Lmax)
+                if v <= vmin or v >= vmax:
+                    v = vmax
+                L = min(max(Lmin, L), Lmax)
 
-            outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
+                outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
 
     return outliers
