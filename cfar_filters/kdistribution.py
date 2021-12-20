@@ -89,6 +89,9 @@ def detector(image, N=100, pfa=1e-12):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
+            # offset to ensure pdf starts near 0 (which is important for the mom estimation)
+            sub_block_image = sub_block_image - np.nanmin(sub_block_image)
+
             if np.all(np.isnan(sub_block_image)):
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
@@ -99,8 +102,13 @@ def detector(image, N=100, pfa=1e-12):
                 if np.any(np.isnan(np.array([v, L]))):
                     μ, v, L = _mom_estimation_simple(sub_block_image)
 
+                # If v is negative it is likely that the equations broke down
+                # due to the denominator in the simple mom estimation
+                # If v is very large, the distribution is likely near gamma
+                # In both cases use vmax. 
                 if v <= vmin or v >= vmax:
                     v = vmax
+                # L cannot be smaller than 1 or larger than p*ENL
                 L = min(max(Lmin, L), Lmax)
 
                 outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)

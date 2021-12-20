@@ -23,8 +23,6 @@ def transform(image, mask=0):
 
     Δ = (HV_test - HV_train) / (HH_train + eps)
 
-    Δ = Δ - np.nanmin(Δ)  # offset to avoid negative values
-
     Δ = _mask_edges(Δ, 6)
 
     return Δ
