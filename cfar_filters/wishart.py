@@ -4,7 +4,7 @@ from scipy.stats import chi2
 from rs_utils.sar_functions import smells_like, db2in
 from .fast_functions import fast_edge_mean
 
-# Implements equation 19 in the article
+# Implements equation 17+18+19 in the article
 def _calc_prob(p, n, m, lnQ):
     r = 1 - ((2 * p**2 - 1) / (6 * p)) * (1 / n + 1 / m - 1 / (n + m))
     ω2 = -p**2 / 4 * (1 - 1 / r)**2 + (p**2 * (p**2 - 1) / (24)) * (
