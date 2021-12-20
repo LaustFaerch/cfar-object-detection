@@ -52,7 +52,7 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=500, pfa=1e-12, L=np.nan):
+def detector(image, N=500, pfa=1e-12, L=np.nan, truncate=False):
 
     # if we dont have L, use ENL estimation
     est_enl_flag = False
@@ -68,12 +68,22 @@ def detector(image, N=500, pfa=1e-12, L=np.nan):
         for y in range(0, n_cols):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
-            sub_block_image = sub_block_image - np.nanmin(sub_block_image)  # make sure posistive
+            sub_block_image = sub_block_image - np.nanmin(sub_block_image)  # make sure positive
 
-            if est_enl_flag:
-                L = np.nanmean(sub_block_image)**2 / np.nanvar(sub_block_image)
+            if truncate:
+                truncated_sub_block_image = np.where(sub_block_image > np.nanquantile(sub_block_image, 0.99),
+                                                     np.nan, sub_block_image)
 
-            μ, v = _k_params(sub_block_image, L)
+                if est_enl_flag:
+                    L = np.nanmean(truncated_sub_block_image)**2 / np.nanvar(truncated_sub_block_image)
+
+                μ, v = _k_params(truncated_sub_block_image, L)
+            else:
+
+                if est_enl_flag:
+                    L = np.nanmean(sub_block_image)**2 / np.nanvar(sub_block_image)
+
+                μ, v = _k_params(sub_block_image, L)
 
             outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
 
