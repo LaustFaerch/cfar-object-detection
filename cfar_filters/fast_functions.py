@@ -32,7 +32,7 @@ def _edge_kernel_mean(x, m):
         for i in range(-6, 7):
             for ii in range(-6, 7):
                 # Corresponding to inner_window_size==7
-                if (i <= -3 or i >= 3) or (ii <= -3 or ii >= 3):
+                if (i < -3 or i > 3) or (ii < -3 or ii > 3):
                     cumul += x[i, ii]
         return nb.float32(cumul / 120)
     else:
@@ -46,14 +46,14 @@ def _edge_kernel_std(x, m):
         for i in range(-6, 7):
             for ii in range(-6, 7):
                 # Corresponding to inner_window_size==7
-                if (i <= -3 or i >= 3) or (ii <= -3 or ii >= 3):
+                if (i < -3 or i > 3) or (ii < -3 or ii > 3):
                     cumul += x[i, ii]
         mean = nb.float32(cumul / 120)
 
         cumul = 0
         for i in range(-6, 7):
             for ii in range(-6, 7):
-                if (i <= -3 or i >= 3) or (ii <= -3 or ii >= 3):
+                if (i < -3 or i > 3) or (ii < -3 or ii > 3):
                     cumul += (x[i, ii] - mean)**2
         return nb.float32(np.sqrt(cumul / 120))
     else:

@@ -48,7 +48,6 @@ def _k_params(image, L):
 def _kd_cfar(image, μ, v, L, pde):
     init = 5 * μ  # initial guess of the algorithm
     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
-#     print('T',T)
     outliers = image > T
     return outliers
 
