@@ -23,26 +23,48 @@ def k_pdf(x, μ, v, L):
 
     return pdf
 
-# wrapper for the integration function
-# the function becomes numerically instable when enl and v are floating
-# I dont know what causes this, but choose to round as that seems like the best approach
-# def _k_integration(I, μ, v, enl):
-#     return k_pdf(I, μ, np.round(v), np.round(enl))
-
 # Numerical integration of the k-distribution using scipy.integrate
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
-def _k_params(image, L):
-    vmin = 1
-    vmax = 50
+def _mom_estimation_full(image):
+
+    median = np.nanmedian(image)
+    image = np.where(image > 3 * median, np.nan, image)
 
     μ = np.nanmean(image)
+
+    I2 = np.nanmean((image)**2)  # 2nd raw sample moment
+    I3 = np.nanmean((image)**3)  # 3rd raw sample moment
+
+    W2 = I2 / μ**2
+    W3 = (I3 / μ**3) / (W2)
+
+    b = (W3 - 4 * W2 - 1)
+    D = b**2 - 16 * W2
+
+    # no solution
+    if D <= 0:
+        return μ, np.nan, np.nan
+
+    Vplus = 1 / 4 * (-b + np.sqrt(D))
+    Vminus = 1 / 4 * (-b - np.sqrt(D))
+    V = max(Vplus, Vminus)
+    U = W2 / V
+
+    L = 1 / (U - 1)
+    v = 1 / (V - 1)
+
+    return μ, v, L
+
+def _mom_estimation_simple(image):
+
+    μ = np.nanmean(image)
+    L = μ**2 / np.nanvar(image)
     K = np.nanmean(image**2) / μ**2
     v = (L + 1) / (L * K - L - 1)
-    v = min(max(vmin, v), vmax)
 
-    return μ, v
+    return μ, v, L
 
 # K-distribution CFAR on image blocks
 def _kd_cfar(image, μ, v, L, pde):
@@ -52,12 +74,10 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=500, pfa=1e-12, L=np.nan):
+def detector(image, N=100, pfa=1e-12):
 
-    # if we dont have L, use ENL estimation
-    est_enl_flag = False
-    if np.isnan(L):
-        est_enl_flag = True
+    vmin, vmax = 1, 50
+    Lmin, Lmax = 1, 22  # 2xENL
 
     outliers = np.zeros_like(image).astype(np.bool)
     pde = 1 - (pfa)  # probability of detection
@@ -68,12 +88,17 @@ def detector(image, N=500, pfa=1e-12, L=np.nan):
         for y in range(0, n_cols):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
-            sub_block_image = sub_block_image - np.nanmin(sub_block_image)  # make sure posistive
 
-            if est_enl_flag:
-                L = np.nanmean(sub_block_image)**2 / np.nanvar(sub_block_image)
+            # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
+            μ, v, L = _mom_estimation_full(sub_block_image)
 
-            μ, v = _k_params(sub_block_image, L)
+            # if the mom estimation fails, use a simpler estimation
+            if np.any(np.isnan(np.array([v, L]))):
+                μ, v, L = _mom_estimation_simple(sub_block_image)
+
+            if v <= vmin or v >= vmax:
+                v = vmax
+            L = min(max(Lmin, L), Lmax)
 
             outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
 
