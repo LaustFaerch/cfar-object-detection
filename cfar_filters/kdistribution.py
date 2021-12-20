@@ -89,12 +89,13 @@ def detector(image, N=100, pfa=1e-12):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
-            # offset to ensure pdf starts near 0 (which is important for the mom estimation)
-            sub_block_image = sub_block_image - np.nanmin(sub_block_image)
-
             if np.all(np.isnan(sub_block_image)):
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
+
+                # offset to ensure pdf starts near 0 (which is important for the mom estimation)
+                sub_block_image = sub_block_image - np.nanmin(sub_block_image)
+
                 # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
                 μ, v, L = _mom_estimation_full(sub_block_image)
 
