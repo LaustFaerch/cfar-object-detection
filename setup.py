@@ -11,6 +11,7 @@ setup(
     setup_requires=[
         'numpy',
         'pandas',
+        'numba',
     ],
     install_requires=[]
 )
