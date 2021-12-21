@@ -108,7 +108,7 @@ def detector(image, N=250, pfa=1e-12, offset=False):
                 # If v is negative it is likely that the equations broke down
                 # due to the denominator in the simple mom estimation
                 # If v is very large, the distribution is likely near gamma
-                # In both cases use vmax. 
+                # In both cases use vmax.
                 if v <= vmin or v >= vmax:
                     v = vmax
                 # L cannot be negative
