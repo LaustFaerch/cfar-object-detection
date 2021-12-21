@@ -4,6 +4,7 @@ Includes 3 different CFAR detectors:
 * WISHART (Conradsen)
 * LogNormal ()
 * K-Distribution (Chen Liu)
+
 And 2 different detection transformations:
 * DPolRad (Armando Marino)
 * Normalized Intensity Sum (Chen Liu)

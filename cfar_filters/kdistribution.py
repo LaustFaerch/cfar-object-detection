@@ -89,7 +89,8 @@ def detector(image, N=250, pfa=1e-12, offset=False):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
-            if np.all(np.isnan(sub_block_image)):
+            # if block is masked then skip the block
+            if np.all(np.isnan(sub_block_image)) or np.all(sub_block_image == 0):
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
 
