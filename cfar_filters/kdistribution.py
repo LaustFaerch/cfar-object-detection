@@ -27,6 +27,7 @@ def k_pdf(x, μ, v, L):
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
+# TODO: why do we get RunTimeWarnings ?s
 def _mom_estimation_full(image):
 
     median = np.nanmedian(image)
@@ -90,6 +91,7 @@ def detector(image, N=250, pfa=1e-12, offset=False):
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
             # if block is masked then skip the block
+            # TODO: also check for combination of NaN and 0
             if np.all(np.isnan(sub_block_image)) or np.all(sub_block_image == 0):
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
