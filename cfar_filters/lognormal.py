@@ -7,10 +7,10 @@ from .fast_functions import fast_edge_mean, fast_edge_std
 
 
 def _mask_edges(image, N):
-    image[0:N, :] = np.nan
-    image[:, 0:N] = np.nan
-    image[-N:, :] = np.nan
-    image[:, -N:] = np.nan
+    image[0:N, :] = False
+    image[:, 0:N] = False
+    image[-N:, :] = False
+    image[:, -N:] = False
     return image
 
 # only works for standardized data (zero mean std=1)
