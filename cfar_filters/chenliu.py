@@ -13,6 +13,6 @@ def transform(image, mask=0):
     HH_edge = np.where(HH_edge == 0, np.nan, HH_edge)
     HV_edge = np.where(HV_edge == 0, np.nan, HV_edge)
 
-    detection_image = (image[0, ...] / HH_edge) + (image[1, ...] / HV_edge)
+    NIS = (image[0, ...] / HH_edge) + (image[1, ...] / HV_edge)
 
-    return detection_image
+    return NIS

@@ -17,11 +17,11 @@ def transform(image, mask=0):
 
     eps = db2in(-100)  # small number
 
-    HV_test = fast_center_mean(image[1, ...], mask)
-    HV_train = fast_edge_mean(image[1, ...], mask)
-    HH_train = fast_edge_mean(image[0, ...], mask)
-
-    Δ = (HV_test - HV_train) / (HH_train + eps)
+    HV_target = fast_center_mean(image[1, ...], mask)
+    HV_clutter = fast_edge_mean(image[1, ...], mask)
+    HH_clutter = fast_edge_mean(image[0, ...], mask)
+    # TODO, maybe remove the eps thing and add a check for HH_clutter == 0?
+    Δ = (HV_target - HV_clutter) / (HH_clutter + eps)
 
     Δ = _mask_edges(Δ, 6)
 

@@ -5,6 +5,11 @@ from rs_utils.sar_functions import smells_like, db2in
 from .fast_functions import fast_edge_mean
 
 # Implements equation 17+18+19 in the article
+# precision of chi2.cdf means minimum value is around 1e-16
+# so the corresponding minimum PFA is around 1e-16
+# we could consider reimplementing the chi2, e.g. see this page:
+# https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats,
+# but is it really worth it?
 def _calc_prob(p, n, m, lnQ):
     r = 1 - ((2 * p**2 - 1) / (6 * p)) * (1 / n + 1 / m - 1 / (n + m))
     ω2 = -p**2 / 4 * (1 - 1 / r)**2 + (p**2 * (p**2 - 1) / (24)) * (
