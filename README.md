@@ -14,3 +14,5 @@ TODO:
 * write documentation
 * Add comments/headers to functions
 * K-distribution sometimes fails at the image borders - maybe due to low amount of samples?
+* Move mask_edges to somewhere else
+* check warnings should also be moved somewhere
