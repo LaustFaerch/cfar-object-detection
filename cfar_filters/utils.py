@@ -1,42 +1,42 @@
 import numpy as np
 import pandas as pd
 
-def db2in(img):
+def db2in(image):
     """
     Convert decibel to intensity
 
     Parameters:
     ----------
-    img : numpy.ndarray (N,X,Y)
+    image : numpy.ndarray (N,X,Y)
         SAR image in decibel
 
     Returns:
     ----------
-    img : numpy.ndarray (N,X,Y)
+    image : numpy.ndarray (N,X,Y)
         SAR image in intensity
     """
-    return np.power(10, np.divide(img, 10))
+    return np.power(10, np.divide(image, 10))
 
 
-def in2db(img):
+def in2db(image):
     """
     Convert intensity to decibel
 
     Parameters:
     ----------
-    img : numpy.ndarray (N,X,Y)
+    image : numpy.ndarray (N,X,Y)
         SAR image in intensity
 
     Returns:
     ----------
-    img : numpy.ndarray (N,X,Y)
+    image : numpy.ndarray (N,X,Y)
         SAR image in decibel
 
     """
-    return 10 * np.log10(np.absolute(img))
+    return 10 * np.log10(np.absolute(image))
 
 
-def smells_like(img, K=1000):
+def smells_like(image, K=1000):
     """
     Often, SAR images are visualized in decibel scale.
     However, processing are often executed in linear intensity scale.
@@ -46,7 +46,7 @@ def smells_like(img, K=1000):
 
     Parameters:
     ----------
-    img : numpy.ndarray (N,X,Y)
+    image : numpy.ndarray (N,X,Y)
         SAR image
     K : integer
         Number of samples used to create the statistics
@@ -56,7 +56,7 @@ def smells_like(img, K=1000):
     smells_like : string
         'decibel'/'intensity'/'fishy'
     """
-    samples = pd.DataFrame(img[:, np.random.choice(img.shape[1], K), np.random.choice(img.shape[2], K)].T)
+    samples = pd.DataFrame(image[:, np.random.choice(image.shape[1], K), np.random.choice(image.shape[2], K)].T)
 
     describe = samples.describe()
 
@@ -72,26 +72,26 @@ def smells_like(img, K=1000):
 
     return smells_like
 
-def mask_edges(img, N, fill=False):
+def mask_edges(image, N, fill=False):
     """
     Masks the edges of an image
 
     Parameters:
     ----------
-    img : numpy.ndarray (X,Y)
+    image : numpy.ndarray (X,Y)
         Image to be masked
     fill : value or dtype
         e.g. False or np.nan
 
     Returns:
     ----------
-    img : numpy.ndarray (X,Y)
+    image : numpy.ndarray (X,Y)
         masked image
 
     """
-    img[0:N, :] = fill
-    img[:, 0:N] = fill
-    img[-N:, :] = fill
-    img[:, -N:] = fill
+    image[0:N, :] = fill
+    image[:, 0:N] = fill
+    image[-N:, :] = fill
+    image[:, -N:] = fill
 
-    return img
+    return image
