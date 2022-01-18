@@ -52,7 +52,7 @@ def detector(image, mask=0, pfa=1e-12):
     # check if shapes are correct
     if len(image.shape) != 2:
         raise ValueError(f'Input image must be of shape [X, Y] but is of shape {image.shape}')
-    if image.shape[1:] != mask.shape:
+    if image.shape != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
 
