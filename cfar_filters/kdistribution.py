@@ -28,7 +28,6 @@ def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
 # The full MoM estimation suggested by C. Liu
-# TODO: why do we get RunTimeWarnings ?
 def _mom_estimation_full(image):
 
     median = np.nanmedian(image)
