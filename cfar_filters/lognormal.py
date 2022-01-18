@@ -2,16 +2,9 @@ import warnings
 import numpy as np
 from scipy.special import erf
 from scipy.optimize import minimize
-from rs_utils.sar_functions import smells_like
+from .utils import smells_like, db2in, mask_edges
 from .fast_functions import fast_edge_mean, fast_edge_std
 
-
-def _mask_edges(image, N):
-    image[0:N, :] = False
-    image[:, 0:N] = False
-    image[-N:, :] = False
-    image[:, -N:] = False
-    return image
 
 # only works for standardized data (zero mean std=1)
 def _gaussian_pfa(t):
@@ -40,4 +33,4 @@ def detector(image, mask=0, pfa=1e-6):
 
     outliers = (image - (edge_mean + std_dev_multiplier * egde_std)) > 0
 
-    return _mask_edges(outliers, 6)
+    return mask_edges(outliers, 6, False)

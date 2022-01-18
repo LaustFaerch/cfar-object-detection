@@ -1,15 +1,8 @@
 import warnings
 import numpy as np
 from scipy.stats import chi2
-from rs_utils.sar_functions import smells_like, db2in
 from .fast_functions import fast_edge_mean
-
-def _mask_edges(image, N):
-    image[0:N, :] = False
-    image[:, 0:N] = False
-    image[-N:, :] = False
-    image[:, -N:] = False
-    return image
+from .utils import smells_like, db2in, mask_edges
 
 # Implements equation 17+18+19 in the article
 # precision of chi2.cdf means minimum value is around 1e-16
@@ -111,4 +104,4 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
 
     # we are only interested in bright outliers
     bright_filter = (S11_o / m < S11_s / n) & (S22_o / m < S22_s / n)
-    return _mask_edges((outliers * bright_filter), 6)
+    return mask_edges((outliers * bright_filter), 6, False)
