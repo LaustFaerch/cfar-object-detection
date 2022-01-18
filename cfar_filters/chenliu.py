@@ -1,4 +1,6 @@
+import warnings
 import numpy as np
+from .utils import smells_like, mask_edges
 from .fast_functions import fast_edge_mean
 
 # TODO: Maybe we should remane this file. chenliu is too generic, maybe rename to normsum
@@ -20,12 +22,30 @@ def transform(image, mask=0):
     Returns:
     ----------
     transform : numpy.ndarray(float32) (X,Y)
-        DPolRad Transform
+        NIS Transform
     """
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
+
+    # check datatypes are correct
+    if not isinstance(image, np.ndarray) | (image.dtype != np.float32):
+        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
+    if not isinstance(mask, np.ndarray) | (mask.dtype != np.bool):
+        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
+
+    # check if shapes are correct
+    if (len(image.shape) != 3) or (image.shape[0] != 2):
+        raise ValueError(f'Input image must be of shape [2, X, Y] but is of shape {image.shape}')
+    if image.shape[1:] != mask.shape:
+        raise ValueError((f'Shape of mask must match shape of image. \
+                          Mask shape: {mask.shape}. Image shape {image.shape[1:]}'))
+
+    # check if the image format
+    if smells_like(image) != 'intensity':
+        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
+                      category=UserWarning)
 
     HH_edge = fast_edge_mean(image[0, ...], mask)
     HV_edge = fast_edge_mean(image[1, ...], mask)
@@ -35,4 +55,6 @@ def transform(image, mask=0):
 
     NIS = (image[0, ...] / HH_edge) + (image[1, ...] / HV_edge)
 
-    return NIS
+    transform = mask_edges(NIS, 6, np.nan)
+
+    return transform
