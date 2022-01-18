@@ -4,13 +4,16 @@ from scipy.stats import chi2
 from .fast_functions import fast_edge_mean
 from .utils import smells_like, db2in, mask_edges
 
-# Implements equation 17+18+19 in the article
-# precision of chi2.cdf means minimum value is around 1e-16
-# so the corresponding minimum PFA is around 1e-16
-# we could consider reimplementing the chi2, e.g. see this page:
-# https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats,
-# but is it really worth it?
 def _calc_prob(p, n, m, lnQ):
+    """
+    Implementation of e.q. 17/18/19 in the article
+
+    NB.: Precision of chi2.cdf is such that the minimum value of around 1e-16
+    This means that we cannot use the CFAR filter for PFA values below 1e-16
+    For lower PFA values, consider reimplementing the chi2.cdf function. e.g. see answer here:
+    https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats
+
+    """
     r = 1 - ((2 * p**2 - 1) / (6 * p)) * (1 / n + 1 / m - 1 / (n + m))
     ω2 = -p**2 / 4 * (1 - 1 / r)**2 + (p**2 * (p**2 - 1) / (24)) * (
         (1 / n**2) + (1 / m**2) - (1 / (n + m)**2)) * (1 / r**2)
@@ -20,7 +23,7 @@ def _calc_prob(p, n, m, lnQ):
     return P
 
 
-def detector(image, mask=0, pfa=1e-6, enl=10):
+def detector(image, mask=0, pfa=1e-12, enl=10):
     """
     CFAR filter implementation based on the Wishart distributions.
     Based on eq. 15 in this paper:
@@ -29,11 +32,8 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     to change detection in polarimetric SAR data,”
     IEEE Trans. Geosci. Remote Sens., vol. 41, no. 1, pp. 4-19, 2003, doi: 10.1109/TGRS.2002.808066.
 
-    At the moment, the filter is only suitable for Sentinel-1 EW GRDM!
-    T have been found empirically. Generally suitable values are around 3e4 - 3.5e4
-    Suitable ENL values can be found here:
+    ENL values for Sentinel-1 can be found here:
     https://sentinels.copernicus.eu/web/sentinel/technical-guides/sentinel-1-sar/products-algorithms/level-1-algorithms/ground-range-detected/ew
-    I am generally using ENL around 9-10.
     Known issues:
         -  Missed detections in heteorogeneous areas
         -  False detections on edges (eg. between land and water)
