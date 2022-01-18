@@ -16,17 +16,15 @@ def transform(image, mask=0):
 
     Parameters:
     ----------
-    image : numpy.ndarray(float32) (2, X,Y)
-        SAR image in linear intensity formal
+    image : numpy.ndarray(float32) (2,X,Y)
+        SAR image in linear intensity format
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
-    pfa : float
-        Probability of false alarm. Should be somewhere between 0-1
 
     Returns:
     ----------
-    outliers : numpy.ndarray(bool) (X,Y)
-        Binary outlier classification
+    transform : numpy.ndarray(float32) (X,Y)
+        DPolRad Transform
     """
 
     # if no mask is given, assume all pixels are valid
@@ -56,8 +54,8 @@ def transform(image, mask=0):
     HH_clutter = fast_edge_mean(image[0, ...], mask)
 
     HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)
-    Δ = (HV_target - HV_clutter) / (HH_clutter)
+    transform = (HV_target - HV_clutter) / (HH_clutter)
 
-    Δ = mask_edges(Δ, 6, np.nan)
+    transform = mask_edges(transform, 6, np.nan)
 
-    return Δ
+    return transform
