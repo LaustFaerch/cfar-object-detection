@@ -13,7 +13,6 @@ And 2 different detection transformations:
 * Normalized Intensity Sum (Chen Liu 2015)
 
 TODO:
-* get warnings under control
 * write documentation
 * Add examples
 * K-distribution sometimes fails at the image borders - maybe due to low amount of samples?
