@@ -85,7 +85,7 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
     The filter is based on the paper:
-    C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,” 
+    C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,”
     Can. J. Remote Sens., vol. 44, no. 4, pp. 299-310, 2018, doi: 10.1080/07038992.2018.1491789.
 
     The filter estimated the K-distribution parameters on NxN blocks of the image.
