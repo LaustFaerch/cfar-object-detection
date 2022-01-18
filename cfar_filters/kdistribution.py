@@ -4,8 +4,8 @@ import scipy.integrate as integrate
 from scipy.optimize import fmin
 
 # implementation of the K-distribution pdf
-# from Quegan eq. 8.21
-# This expression also use by Brekke. And it is identical to the expression used by Liu
+# E.q. 8.21 in Oliver/Quegan:
+# C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53, no. 9. 1997.
 def k_pdf(x, μ, v, L):
 
     v = np.float64(v)
@@ -27,7 +27,8 @@ def k_pdf(x, μ, v, L):
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
-# TODO: why do we get RunTimeWarnings ?s
+# The full MoM estimation suggested by C. Liu
+# TODO: why do we get RunTimeWarnings ?
 def _mom_estimation_full(image):
 
     median = np.nanmedian(image)
@@ -38,26 +39,31 @@ def _mom_estimation_full(image):
     I2 = np.nanmean((image)**2)  # 2nd raw sample moment
     I3 = np.nanmean((image)**3)  # 3rd raw sample moment
 
-    W2 = I2 / μ**2
-    W3 = (I3 / μ**3) / (W2)
+    W2 = I2 / μ**2  # e.q. 11
+    W3 = (I3 / μ**3) / (W2)  # e.q. 11
 
     b = (W3 - 4 * W2 - 1)
     D = b**2 - 16 * W2
 
-    # no solution
+    # If the discriminant is below zero, we have no solution
     if D <= 0:
         return μ, np.nan, np.nan
 
+    # e.q. 12
     Vplus = 1 / 4 * (-b + np.sqrt(D))
     Vminus = 1 / 4 * (-b - np.sqrt(D))
     V = max(Vplus, Vminus)
     U = W2 / V
 
+    # e.q. 10
     L = 1 / (U - 1)
     v = 1 / (V - 1)
 
     return μ, v, L
 
+# Simple MoM estimation
+# We assume that mean^2/var is a good estimation for L
+# V is then estimated based on e.q. 6 in the paper
 def _mom_estimation_simple(image):
 
     μ = np.nanmean(image)
@@ -75,16 +81,52 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=250, pfa=1e-12, offset=False):
+def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
+    """
+    CFAR filter implementation based on the K-normal distribution.
+    The filter is based on the paper:
+    C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,” 
+    Can. J. Remote Sens., vol. 44, no. 4, pp. 299-310, 2018, doi: 10.1080/07038992.2018.1491789.
+
+    The filter estimated the K-distribution parameters on NxN blocks of the image.
+    Parameters are estimated using the MoM method suggested in the paper
+
+
+    Parameters:
+    ----------
+    image : numpy.ndarray (X,Y)
+        SAR image in linear intensity format
+    N : Integer
+        Block size for the estimation (tile size in the paper)
+    pfa : float
+        Probability of false alarm. Should be somewhere between 0-1
+    offset: np.bool
+        Flag used to select whether the sub blocks should be offset to 0
+        The MoM estimation works best of the distribution starts near 0
+        Set offset = True for the dpolrad transform
+        Set Offset = False for the NIS transform
+    enl : float
+        Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
+
+    Returns:
+    ----------
+    outliers : numpy.ndarray(bool) (X,Y)
+        Binary outlier classification
+    """
+
+    # check if shapes are correct
+    if len(image.shape) != 2:
+        raise ValueError(f'Input image must be of shape [X, Y] but is of shape {image.shape}')
 
     vmin, vmax = 1, 50
-    Lmin, Lmax = 1, 22  # 2xENL
+    Lmin, Lmax = 1, 2 * enl
 
     outliers = np.zeros_like(image).astype(np.bool)
-    pde = 1 - (pfa)  # probability of detection
+    pde = 1 - (pfa)  # probability of true detection
 
     n_rows, n_cols = np.asarray(image.shape[0:2]) // N + (np.mod(np.asarray(image.shape[0:2]), N) > 0) * 1
 
+    # loop over blocks (tiles)
     for x in range(0, n_rows):
         for y in range(0, n_cols):
 
@@ -103,7 +145,7 @@ def detector(image, N=250, pfa=1e-12, offset=False):
                 # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
                 μ, v, L = _mom_estimation_full(sub_block_image)
 
-                # if the mom estimation fails, use a simpler estimation
+                # if the mom estimation above fails, use a simpler estimation
                 if np.any(np.isnan(np.array([v, L]))):
                     μ, v, L = _mom_estimation_simple(sub_block_image)
 
