@@ -12,6 +12,7 @@ setup(
         'numpy',
         'pandas',
         'numba',
+        'scipy'
     ],
     install_requires=[]
 )

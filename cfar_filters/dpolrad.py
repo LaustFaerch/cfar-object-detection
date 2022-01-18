@@ -1,13 +1,7 @@
 import numpy as np
-from rs_utils.sar_functions import db2in
+from .utils import smells_like, db2in, mask_edges
 from .fast_functions import fast_edge_mean, fast_center_mean
 
-def _mask_edges(image, N):
-    image[0:N, :] = np.nan
-    image[:, 0:N] = np.nan
-    image[-N:, :] = np.nan
-    image[:, -N:] = np.nan
-    return image
 
 def transform(image, mask=0):
 
@@ -23,6 +17,6 @@ def transform(image, mask=0):
     # TODO, maybe remove the eps thing and add a check for HH_clutter == 0?
     Δ = (HV_target - HV_clutter) / (HH_clutter + eps)
 
-    Δ = _mask_edges(Δ, 6)
+    Δ = mask_edges(Δ, 6, np.nan)
 
     return Δ
