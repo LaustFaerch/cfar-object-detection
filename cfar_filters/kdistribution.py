@@ -120,6 +120,7 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
 
     vmin, vmax = 1, 50
     Lmin, Lmax = 1, 2 * enl
+    req_valid_samples = 2500  # minimum number of valid samples in block
 
     outliers = np.zeros_like(image).astype(np.bool)
     pde = 1 - (pfa)  # probability of true detection
@@ -132,8 +133,11 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
 
             sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
 
+            # count number of pixels not 0 and nan
+            no_valid_samples = np.sum(~np.isnan(sub_block_image) & (sub_block_image != 0))
+
             # if block is masked then skip the block
-            if np.all(np.isnan(sub_block_image) | (sub_block_image == 0)):
+            if no_valid_samples <= req_valid_samples:
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
 
