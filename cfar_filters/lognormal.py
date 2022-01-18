@@ -26,7 +26,7 @@ def detector(image, mask=0, pfa=1e-12):
 
     Parameters:
     ----------
-    img : numpy.ndarray(float32) (X,Y)
+    image : numpy.ndarray(float32) (X,Y)
         SAR image in linear intensity formal
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
