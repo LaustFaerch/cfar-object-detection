@@ -42,7 +42,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     Parameters:
     ----------
-    img : numpy.ndarray(float32) (K,X,Y)
+    image : numpy.ndarray(float32) (2,X,Y)
         SAR image in linear intensity formal
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
@@ -68,10 +68,8 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
 
     # check if shapes are correct
-    if len(image.shape) != 3:
-        raise ValueError(f'Input image must be of shape [K, X, Y] but is of shape {image.shape}')
-    if image.shape[0] != 2:
-        raise ValueError(f'Input image must contain exactly 2 bands but contains {image.shape[0]} bands')
+    if (len(image.shape) != 3) or (image.shape[0] != 2):
+        raise ValueError(f'Input image must be of shape [2, X, Y] but is of shape {image.shape}')
     if image.shape[1:] != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape[1:]}'))
