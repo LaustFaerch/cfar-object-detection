@@ -26,7 +26,7 @@ def _calc_prob(p, n, m, lnQ):
 def detector(image, mask=0, pfa=1e-12, enl=10):
     """
     CFAR filter implementation based on the Wishart distributions.
-    Based on eq. 15 in this paper:
+    Based on this paper:
     K. Conradsen, A. A. Nielsen, J. Schou, and H. Skriver,
     “A test statistic in the complex wishart distribution and its application
     to change detection in polarimetric SAR data,”
