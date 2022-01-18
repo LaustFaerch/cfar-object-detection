@@ -28,49 +28,53 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     “A test statistic in the complex wishart distribution and its application
     to change detection in polarimetric SAR data,”
     IEEE Trans. Geosci. Remote Sens., vol. 41, no. 1, pp. 4-19, 2003, doi: 10.1109/TGRS.2002.808066.
+
     At the moment, the filter is only suitable for Sentinel-1 EW GRDM!
     T have been found empirically. Generally suitable values are around 3e4 - 3.5e4
     Suitable ENL values can be found here:
     https://sentinels.copernicus.eu/web/sentinel/technical-guides/sentinel-1-sar/products-algorithms/level-1-algorithms/ground-range-detected/ew
     I am generally using ENL around 9-10.
     Known issues:
-        -  Large continous objects not detected (typically problems start to occur for objects larger than 8 pixels)
         -  Missed detections in heteorogeneous areas
         -  False detections on edges (eg. between land and water)
         -  Objects cannot be separated (eg. ships/icebergs/islands are all detected the same)
         -  Objects embedded in rough sea ice is hard to detect
-    TODO:
-        -  Handle NaNs in the area near icebergs (e.g. from landmask)
-        - Maybe make a check function to avoid copying all the checks
 
     Parameters:
     ----------
     img : numpy.ndarray(float32) (K,X,Y)
+        SAR image in linear intensity formal
     mask : numpy.ndarray(bool) (X,Y)
+        Mask for the image.
     pfa : float
+        Probability of false alarm. Should be somewhere between 0-1
+    enl : float
+        Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
+
     Returns:
     ----------
     outliers : numpy.ndarray(bool) (X,Y)
+        Binary outlier classification
     """
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    # TODO: print more stuff if error is raied. e.g. print the shape if shape error
     # check datatypes are correct
     if not isinstance(image, np.ndarray) | (image.dtype != np.float32):
-        raise TypeError('Input image must be of type np.ndarray(float32)')
-    if not isinstance(image, np.ndarray) | (mask.dtype != np.bool):
-        raise TypeError('Input mask must be of type np.ndarray(bool)')
+        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
+    if not isinstance(mask, np.ndarray) | (mask.dtype != np.bool):
+        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
 
     # check if shapes are correct
     if len(image.shape) != 3:
-        raise ValueError('Input image must be of shape [K, X, Y]')
+        raise ValueError(f'Input image must be of shape [K, X, Y] but is of shape {image.shape}')
     if image.shape[0] != 2:
-        raise ValueError('Input image must contain exactly 2 bands')
+        raise ValueError(f'Input image must contain exactly 2 bands but contains {image.shape[0]} bands')
     if image.shape[1:] != mask.shape:
-        raise ValueError('Number of rows/cols must be the same for image and mask')
+        raise ValueError((f'Shape of mask must match shape of image. \
+                          Mask shape: {mask.shape}. Image shape {image.shape[1:]}'))
 
     # check if the image format
     if smells_like(image) != 'intensity':
@@ -100,8 +104,10 @@ def detector(image, mask=0, pfa=1e-6, enl=10):
     lnQ = lnk + lnΔ
 
     P = _calc_prob(p, n, m, lnQ)
-    outliers = (1 - P) <= pfa
+    Δ = (1 - P) <= pfa
 
     # we are only interested in bright outliers
-    bright_filter = (S11_o / m < S11_s / n) & (S22_o / m < S22_s / n)
-    return mask_edges((outliers * bright_filter), 6, False)
+    bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
+    outliers = mask_edges((Δ * bright_filter), 6, False)
+
+    return outliers
