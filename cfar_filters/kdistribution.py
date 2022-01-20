@@ -78,7 +78,7 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
+def detector(image, N=200, pfa=1e-12, offset=False, enl=20):
     """
     CFAR filter implementation based on the K-normal distribution.
     The filter is based on the paper:
@@ -104,6 +104,9 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
         Set Offset = False for the NIS transform
     enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
+        If using a linear transformation image (e.g. DPolRad/NIS), then remember that the number of looks are influenced
+        From C. Liu: "When a combined decision variable is derived from Equation (1), 
+        the maximum possible value of L is the sum of the number of looks of the channels."
 
     Returns:
     ----------
@@ -134,7 +137,7 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
             no_valid_samples = np.sum(~np.isnan(sub_block_image) & (sub_block_image != 0))
 
             # if block is masked then skip the block
-            if no_valid_samples <= req_valid_samples:   
+            if no_valid_samples <= req_valid_samples:
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
 
