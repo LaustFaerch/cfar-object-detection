@@ -13,7 +13,7 @@ def _gaussian_pfa(t):
 def _gaussian_pfa_minimization(x, pfa):
     return np.abs(_gaussian_pfa(x) - pfa)
 
-# Finc the requierd multiplier for a desired PFA level
+# Finc the required multiplier for a desired PFA level numerically
 def _find_gaussian_multiplier(pfa):
     res = minimize(_gaussian_pfa_minimization, 5, args=(pfa), method='Nelder-Mead', tol=1e-6)
     return res.x[0]

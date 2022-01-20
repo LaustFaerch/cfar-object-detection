@@ -101,8 +101,8 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
     lnΔ = (n * np.log(detX) + m * np.log(detY)) - ((n + m) * np.log(detXY))
     lnQ = lnk + lnΔ
 
-    P = _calc_prob(p, n, m, lnQ)
-    Δ = (1 - P) <= pfa
+    Pw = _calc_prob(p, n, m, lnQ)
+    Δ = (1 - Pw) <= pfa
 
     # we are only interested in bright outliers
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
