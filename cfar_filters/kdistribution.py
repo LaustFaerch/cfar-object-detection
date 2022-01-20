@@ -60,13 +60,11 @@ def _mom_estimation_full(image):
 
     return μ, v, L
 
-# Simple MoM estimation
-# We assume that mean^2/var is a good estimation for L
+# Simple MoM estimation using the system ENL
 # V is then estimated based on e.q. 6 in the paper
-def _mom_estimation_simple(image):
+def _mom_estimation_simple(image, L):
 
     μ = np.nanmean(image)
-    L = μ**2 / np.nanvar(image)
     K = np.nanmean(image**2) / μ**2
     v = (L + 1) / (L * K - L - 1)
 
@@ -136,7 +134,7 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
             no_valid_samples = np.sum(~np.isnan(sub_block_image) & (sub_block_image != 0))
 
             # if block is masked then skip the block
-            if no_valid_samples <= req_valid_samples:
+            if no_valid_samples <= req_valid_samples:   
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
 
@@ -148,9 +146,9 @@ def detector(image, N=250, pfa=1e-12, offset=False, enl=10):
                 # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
                 μ, v, L = _mom_estimation_full(sub_block_image)
 
-                # if the mom estimation above fails, use a simpler estimation
+                # if the mom estimation above fails, use a simpler estimation based on the system ENL
                 if np.any(np.isnan(np.array([v, L]))):
-                    μ, v, L = _mom_estimation_simple(sub_block_image)
+                    μ, v, L = _mom_estimation_simple(sub_block_image, enl)
 
                 # If v is negative it is likely that the equations broke down
                 # due to the denominator in the simple mom estimation
