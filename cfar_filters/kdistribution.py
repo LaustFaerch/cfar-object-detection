@@ -105,7 +105,7 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=20):
     enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
         If using a linear transformation image (e.g. DPolRad/NIS), then remember that the number of looks are influenced
-        From C. Liu: "When a combined decision variable is derived from Equation (1), 
+        From C. Liu: "When a combined decision variable is derived from Equation (1),
         the maximum possible value of L is the sum of the number of looks of the channels."
 
     Returns:
