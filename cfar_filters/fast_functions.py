@@ -36,18 +36,6 @@ def _outer_kernel_mean(x, m):
     else:
         return nb.float32(np.nan)
 
-# Corresponding to inner_window_size==3
-@nb.stencil(neighborhood=((-1, 1), (-1, 1)))
-def _center_kernel_mean(x, m):
-    if m[0, 0]:
-        cumul = 0
-        for i in range(-1, 2):
-            for ii in range(-1, 2):
-                cumul += x[i, ii]
-        return nb.float32(cumul / 9)
-    else:
-        return nb.float32(np.nan)
-
 # Corresponding to outer_window_size==13
 @nb.stencil(neighborhood=((-6, 6), (-6, 6)))
 def _edge_kernel_mean(x, m):
@@ -82,10 +70,6 @@ def _edge_kernel_std(x, m):
         return nb.float32(np.sqrt(cumul / 120))
     else:
         return nb.float32(np.nan)
-
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_center_mean(x, m):
-    return _center_kernel_mean(x, m)
 
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
