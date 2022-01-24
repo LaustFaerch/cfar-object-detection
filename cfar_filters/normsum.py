@@ -3,10 +3,9 @@ import numpy as np
 from .utils import smells_like, mask_edges
 from .fast_functions import fast_edge_mean
 
-# TODO: Maybe we should remane this file. chenliu is too generic, maybe rename to normsum
 def transform(image, mask=0):
     """
-    Normalized Intensity Sum transformation.
+    Normalized Intensity Sum transformation (NIS).
     Based on the normalized intensity sum decision variable suggested by Chen Liu in:
     Liu, “A Dual-Polarization Ship Detection Algorithm,” Def. Res. Dev. Canada, no. November, 2015.
 
