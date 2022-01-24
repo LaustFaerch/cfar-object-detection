@@ -1,12 +1,12 @@
 import warnings
 import numpy as np
 from .utils import smells_like, mask_edges
-from .fast_functions import fast_edge_mean, fast_center_mean
+from .fast_functions import fast_edge_mean, fast_center_mean, fast_inner_mean, fast_outer_mean
 
 
 def transform(image, mask=0):
     """
-    Depolarization Ratio Anomaly Transformation.
+    Dual-Pol Ratio Anomaly Detector Transformation (DPolRAD)
     Based on the following paper:
     A. Marino, W. Dierking, and C. Wesche,
     “A Depolarization Ratio Anomaly Detector to Identify Icebergs in Sea Ice Using Dual-Polarization SAR Images,”
@@ -49,9 +49,13 @@ def transform(image, mask=0):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
                       category=UserWarning)
 
-    HV_target = fast_center_mean(image[1, ...], mask)
-    HV_clutter = fast_edge_mean(image[1, ...], mask)
-    HH_clutter = fast_edge_mean(image[0, ...], mask)
+#    HV_target = fast_center_mean(image[1, ...], mask)
+#    HV_clutter = fast_edge_mean(image[1, ...], mask)
+#    HH_clutter = fast_edge_mean(image[0, ...], mask)
+
+    HV_target = fast_inner_mean(image[1, ...], mask)  # test window
+    HV_clutter = fast_outer_mean(image[1, ...], mask)  # train window
+    HH_clutter = fast_outer_mean(image[0, ...], mask)  # train window
 
     HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)
     transform = (HV_target - HV_clutter) / (HH_clutter)

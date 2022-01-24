@@ -1,7 +1,9 @@
 
-cfar-object-detection :ice_cube: :droplet: :mag:
+cfar-object-detection :ice_cube: :mag:
 ======
-
+Iceberg detection in SAR imagery using CFAR filters.
+The code is tailored for 40m pixel spacing C- and L-band imagery.
+ 
 ## Overview
 Includes 3 different CFAR detectors:
 * WISHART (K. Conradsen 2003)
