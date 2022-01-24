@@ -12,15 +12,15 @@ This corresponds to totally 13**2 - 7**2 = 120 pixels in outer window
 import numpy as np
 import numba as nb
 
-# Corresponding to inner_window_size==5
-@nb.stencil(neighborhood=((-2, 2), (-2, 2)))
+# Corresponding to inner_window_size==7
+@nb.stencil(neighborhood=((-3, 3), (-3, 3)))
 def _inner_kernel_mean(x, m):
     if m[0, 0]:
         cumul = 0
-        for i in range(-2, 3):
-            for ii in range(-2, 3):
+        for i in range(-3, 4):
+            for ii in range(-3, 4):
                 cumul += x[i, ii]
-        return nb.float32(cumul / 25)
+        return nb.float32(cumul / 49)
     else:
         return nb.float32(np.nan)
 
