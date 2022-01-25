@@ -41,7 +41,7 @@ def detector(image, mask=0, pfa=1e-12):
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
-        mask = np.ones_like(image[0, ...]) > 0
+        mask = np.ones_like(image) > 0
 
     # check datatypes are correct
     if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
@@ -58,7 +58,7 @@ def detector(image, mask=0, pfa=1e-12):
 
     # check if the image format is correct
     if smells_like(image[None, ...]) != 'decibel':
-        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image)}',
+        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
     image = (image - np.mean(image)) / np.std(image)  # standardize the data
