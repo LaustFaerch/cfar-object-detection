@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 from .utils import smells_like, mask_edges
-from .fast_functions import fast_edge_mean, fast_center_mean, fast_inner_mean, fast_outer_mean
+from .fast_functions import fast_inner_mean, fast_outer_mean
 
 
 def transform(image, mask=0):
