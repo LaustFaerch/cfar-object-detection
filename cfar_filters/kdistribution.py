@@ -119,7 +119,7 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=20):
         raise ValueError(f'Input image must be of shape [X, Y] but is of shape {image.shape}')
 
     vmin, vmax = 1, 50
-    Lmin, Lmax = 1, 2 * enl
+    Lmin, Lmax = 1, enl
     req_valid_samples = 2500  # minimum number of valid samples in block
 
     outliers = np.zeros_like(image).astype(np.bool)
