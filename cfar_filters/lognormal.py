@@ -61,7 +61,7 @@ def detector(image, mask=0, pfa=1e-12):
         warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
-    image = (image - np.mean(image)) / np.std(image)  # standardize the data
+    image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 
     std_dev_multiplier = _find_gaussian_multiplier(pfa)
 
