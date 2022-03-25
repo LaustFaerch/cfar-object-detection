@@ -17,7 +17,8 @@ def _gamma_pfa_minimization(x, pfa, L):
 def _find_gamma_multiplier(pfa, L):
     x0 = L * 2  # initial guess
     res = minimize(_gamma_pfa_minimization, x0, args=(pfa, L), method='Nelder-Mead', tol=1e-6)
-    return res.x[0]
+    return res.x[0] / L  # normalize to the enl
+
 
 def detector(image, mask=0, pfa=1e-12, enl=10):
     """
@@ -62,7 +63,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
-    multiplier = _find_gamma_multiplier(pfa, enl) / np.sqrt(120)
+    multiplier = _find_gamma_multiplier(pfa, enl)
 
     edge_mean = fast_edge_mean(image, mask)
 
