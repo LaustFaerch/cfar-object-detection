@@ -62,7 +62,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
-    multiplier = _find_gamma_multiplier(pfa, enl)
+    multiplier = _find_gamma_multiplier(pfa, enl) / np.sqrt(120)
 
     edge_mean = fast_edge_mean(image, mask)
 
