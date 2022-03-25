@@ -80,7 +80,7 @@ def mask_edges(image, N, fill=False):
     ----------
     image : numpy.ndarray (X,Y)
         Image to be masked
-    fill : value or dtype
+    fill : fill value
         e.g. False or np.nan
 
     Returns:

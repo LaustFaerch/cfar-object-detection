@@ -78,7 +78,7 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=200, pfa=1e-12, offset=False, enl=20):
+def detector(image, N=200, pfa=1e-12, offset=False, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
     The filter is based on the paper:
@@ -102,6 +102,7 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=20):
         The MoM estimation works best of the distribution starts near 0
         Set offset = True for the dpolrad transform
         Set Offset = False for the NIS transform
+
     enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
         If using a linear transformation image (e.g. DPolRad/NIS), then remember that the number of looks are influenced
