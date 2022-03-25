@@ -58,8 +58,8 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
 
     # check if the image format is correct
-    if smells_like(image[None, ...]) != 'decibel':
-        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
+    if smells_like(image[None, ...]) != 'intensity':
+        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
