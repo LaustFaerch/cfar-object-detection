@@ -19,7 +19,7 @@ def _calc_prob(p, n, m, lnQ):
         (1 / n**2) + (1 / m**2) - (1 / (n + m)**2)) * (1 / r**2)
 
     z = -2 * r * lnQ
-    P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)
+    P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)  # TODO: double check this line
     return P
 
 
@@ -106,6 +106,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     # we are only interested in bright outliers
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
-    outliers = mask_edges((Δ * bright_filter), 6, False)
+    outliers = mask_edges(Δ, 6, False)  # mask_edges((Δ * bright_filter), 6, False)
 
     return outliers
