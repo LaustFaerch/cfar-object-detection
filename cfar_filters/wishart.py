@@ -19,7 +19,10 @@ def _calc_prob(p, n, m, lnQ):
         (1 / n**2) + (1 / m**2) - (1 / (n + m)**2)) * (1 / r**2)
 
     z = -2 * r * lnQ
-    P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)  # TODO: double check this line
+    # P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)  # TODO: double check this line
+
+    P = chi2.cdf(z, df=p**2) + ω2 * (chi2.cdf(z, df=p**2 + 4) - chi2.cdf(z, df=p**2))
+
     return P
 
 
