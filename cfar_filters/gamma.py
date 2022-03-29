@@ -3,7 +3,7 @@ import numpy as np
 from scipy.special import gammaincc
 from scipy.optimize import minimize
 from .utils import smells_like, mask_edges
-from .fast_functions import fast_edge_mean
+from .fast_functions import fast_edge_nanmean
 
 
 def _gamma_pfa(t, L):
@@ -65,7 +65,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     multiplier = _find_gamma_multiplier(pfa, enl)
 
-    edge_mean = fast_edge_mean(image, mask)
+    edge_mean = fast_edge_nanmean(image, mask)
 
     Δ = (image > (edge_mean * multiplier))
 
