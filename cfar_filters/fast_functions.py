@@ -46,23 +46,6 @@ def _outer_kernel_mean(x, m):
 
 # Corresponding to outer_window_size==15
 @nb.stencil(neighborhood=((-7, 7), (-7, 7)))
-def _edge_kernel_nanmean(x, m):
-    if m[0, 0]:
-        cumul = 0
-        no_valids = 0
-        for i in range(-7, 8):
-            for ii in range(-7, 8):
-                # Corresponding to inner_window_size==9
-                if (i < -4 or i > 4) or (ii < -4 or ii > 4):
-                    if x[i, ii] != 0:
-                        cumul += x[i, ii]
-                        no_valids += 1
-        return nb.float32(cumul / no_valids)
-    else:
-        return nb.float32(np.nan)
-
-# Corresponding to outer_window_size==15
-@nb.stencil(neighborhood=((-7, 7), (-7, 7)))
 def _edge_kernel_mean(x, m):
     if m[0, 0]:
         cumul = 0
@@ -100,10 +83,6 @@ def _edge_kernel_std(x, m):
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
 def fast_edge_mean(x, m):
     return _edge_kernel_mean(x, m)
-
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_edge_nanmean(x, m):
-    return _edge_kernel_nanmean(x, m)
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
 def fast_edge_std(x, m):
