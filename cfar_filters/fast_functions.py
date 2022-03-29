@@ -7,10 +7,10 @@ Inner window of 9 (~360m)
 Outer window of 15 (~520m)
 This corresponds to totally 15**2 - 9**2 = 144 pixels in outer window
 
-Icebergs at Labrador sea is on average 130 meters long. The maximum icebergs are 379 meters long, 
-with 75% of the icebergs being below 160 meters. If we design the filter for 160 meter icebergs, 
-the inner window whould be 320 or ~ 8 pixels. We need to round up to 9 or ~360m. The outer window 
-of 15 pixels ensure that we have more than 140 pixels for estimating the clutter. 
+Icebergs at Labrador sea is on average 130 meters long. The maximum icebergs are 379 meters long,
+with 75% of the icebergs being below 160 meters. If we design the filter for 160 meter icebergs,
+the inner window whould be 320 or ~ 8 pixels. We need to round up to 9 or ~360m. The outer window
+of 15 pixels ensure that we have more than 140 pixels for estimating the clutter.
 Larger outer window will mean slower execution.
 
 
