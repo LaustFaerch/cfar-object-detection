@@ -54,16 +54,13 @@ def transform(image, mask=0, type='original'):
         HV_clutter = fast_outer_mean(image[1, ...], mask)  # train window
         HH_clutter = fast_outer_mean(image[0, ...], mask)  # train window
 
-        HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)
-        transform = HV_target * (HV_target - HV_clutter) / (HH_clutter)
-
     elif type == 'modified':
         HV_target = image[1, ...]  # test window
         HV_clutter = fast_edge_mean(image[1, ...], mask)  # train window
         HH_clutter = fast_edge_mean(image[0, ...], mask)  # train window
 
-        HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)
-        transform = HV_target * (HV_target - HV_clutter) / (HH_clutter)
+    HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)  # dont divide by 0
+    transform = HV_target * (HV_target - HV_clutter) / (HH_clutter)
 
     transform = mask_edges(transform, 6, np.nan)
 
