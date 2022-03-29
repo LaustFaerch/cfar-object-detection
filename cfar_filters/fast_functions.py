@@ -54,7 +54,7 @@ def _edge_kernel_nanmean(x, m):
             for ii in range(-7, 8):
                 # Corresponding to inner_window_size==9
                 if (i < -4 or i > 4) or (ii < -4 or ii > 4):
-                    if ~np.isnan(x[i, ii]):
+                    if x[i, ii] != 0:
                         cumul += x[i, ii]
                         no_valids += 1
         return nb.float32(cumul / no_valids)
