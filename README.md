@@ -5,9 +5,10 @@ Iceberg detection in SAR imagery using CFAR filters.
 The code is tailored for 40m pixel spacing C- and L-band imagery.
  
 ## Overview
-Includes 3 different CFAR detectors:
+Includes 4 different CFAR detectors:
 * WISHART (K. Conradsen 2003)
 * LogNormal (D. J. Crisp 2004)
+* Gamma (D. J. Crisp 2004)
 * K-Distribution (C. Liu 2018)
 
 And 2 different detection transformations:
