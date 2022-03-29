@@ -54,7 +54,7 @@ def transform(image, mask=0):
     HH_clutter = fast_outer_mean(image[0, ...], mask)  # train window
 
     HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)
-    transform = (HV_target - HV_clutter) / (HH_clutter)
+    transform = HV_target * (HV_target - HV_clutter) / (HH_clutter)
 
     transform = mask_edges(transform, 6, np.nan)
 
