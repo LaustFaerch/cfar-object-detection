@@ -107,6 +107,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     # we are only interested in bright outliers
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
-    outliers = mask_edges((Δ * bright_filter), 6, False)
+    outliers = mask_edges((Δ * bright_filter), 7, False)
 
     return outliers

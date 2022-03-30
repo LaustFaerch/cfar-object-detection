@@ -62,6 +62,6 @@ def transform(image, mask=0, version='original'):
     HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)  # dont divide by 0
     transform = (HV_target - HV_clutter) / (HH_clutter)
 
-    transform = mask_edges(transform, 6, np.nan)
+    transform = mask_edges(transform, 7, np.nan)
 
     return transform

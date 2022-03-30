@@ -54,6 +54,6 @@ def transform(image, mask=0):
 
     NIS = (image[0, ...] / HH_edge) + (image[1, ...] / HV_edge)
 
-    transform = mask_edges(NIS, 6, np.nan)
+    transform = mask_edges(NIS, 7, np.nan)
 
     return transform
