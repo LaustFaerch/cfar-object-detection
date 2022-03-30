@@ -78,7 +78,7 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, N=200, pfa=1e-12, offset=False, enl=10):
+def detector(image, mask, N=200, pfa=1e-12, offset=False, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
     The filter is based on the paper:
@@ -93,6 +93,8 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=10):
     ----------
     image : numpy.ndarray (X,Y)
         SAR image in linear intensity format
+    mask : numpy.ndarray(bool) (X,Y)
+        Mask for the image.
     N : Integer
         Block size for the estimation (tile size in the paper)
     pfa : float
@@ -118,6 +120,11 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=10):
     # check if shapes are correct
     if len(image.shape) != 2:
         raise ValueError(f'Input image must be of shape [X, Y] but is of shape {image.shape}')
+    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
+        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
+    if image.shape != mask.shape:
+        raise ValueError((f'Shape of mask must match shape of image. \
+                          Mask shape: {mask.shape}. Image shape {image.shape}'))
 
     vmin, vmax = 1, 50
     Lmin, Lmax = 1, enl
@@ -168,4 +175,5 @@ def detector(image, N=200, pfa=1e-12, offset=False, enl=10):
 
                 outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
 
+    outliers = np.where(mask, outliers, False)
     return outliers
