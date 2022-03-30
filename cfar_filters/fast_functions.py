@@ -20,15 +20,15 @@ Larger outer window will mean slower execution.
 import numpy as np
 import numba as nb
 
-# Corresponding to inner_window_size==5
-@nb.stencil(neighborhood=((-2, 2), (-2, 2)))
+# Corresponding to inner_window_size==9
+@nb.stencil(neighborhood=((-4, 4), (-4, 4)))
 def _inner_kernel_mean(x, m):
     if m[0, 0]:
         cumul = 0
-        for i in range(-2, 3):
-            for ii in range(-2, 3):
+        for i in range(-4, 5):
+            for ii in range(-4, 5):
                 cumul += x[i, ii]
-        return nb.float32(cumul / 25)
+        return nb.float32(cumul / 81)
     else:
         return nb.float32(np.nan)
 
