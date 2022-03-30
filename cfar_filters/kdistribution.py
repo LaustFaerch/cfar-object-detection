@@ -78,7 +78,7 @@ def _kd_cfar(image, μ, v, L, pde):
     return outliers
 
 
-def detector(image, mask, N=200, pfa=1e-12, offset=False, enl=10):
+def detector(image, mask=0, N=200, pfa=1e-12, offset=False, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
     The filter is based on the paper:
@@ -125,6 +125,10 @@ def detector(image, mask, N=200, pfa=1e-12, offset=False, enl=10):
     if image.shape != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
+
+    # if no mask is given, assume all pixels are valid
+    if np.all(mask == 0):
+        mask = np.ones_like(image[0, ...]) > 0
 
     vmin, vmax = 1, 50
     Lmin, Lmax = 1, enl
