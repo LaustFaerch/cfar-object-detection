@@ -81,7 +81,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
                       category=UserWarning)
 
     n = 1 * enl     # no looks center pixel
-    m = 120 * enl   # no looks edge cell
+    m = 144 * enl   # no looks edge cell
     p = 2           # no dimensions (bands) in image
 
     eps = db2in(-100)   # just a small value
