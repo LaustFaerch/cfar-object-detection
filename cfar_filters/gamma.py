@@ -8,16 +8,16 @@ from .fast_functions import fast_edge_nanmean
 
 def _gamma_pfa(t, L):
     # scipy.stats.gammaincc is already regualized with 1/gamma(L)
-    return gammaincc(L, t)
+    return gammaincc(L, t * L)
 
 def _gamma_pfa_minimization(x, pfa, L):
     return np.abs(_gamma_pfa(x, L) - pfa)
 
-# Finc the required multiplier for a desired PFA level numerically
+# Find the required multiplier for a desired PFA level numerically
 def _find_gamma_multiplier(pfa, L):
     x0 = L * 2  # initial guess
     res = minimize(_gamma_pfa_minimization, x0, args=(pfa, L), method='Nelder-Mead', tol=1e-6)
-    return res.x[0] / L  # normalize to the enl
+    return res.x[0]
 
 
 def detector(image, mask=0, pfa=1e-12, enl=10):

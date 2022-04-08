@@ -63,12 +63,12 @@ def detector(image, mask=0, pfa=1e-12):
 
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 
-    std_dev_multiplier = _find_gaussian_multiplier(pfa)
+    T = _find_gaussian_multiplier(pfa)
 
     edge_mean = fast_edge_mean(image, mask)
     egde_std = fast_edge_std(image, mask)
 
-    Δ = (image - (edge_mean + std_dev_multiplier * egde_std)) > 0
+    Δ = (image > (edge_mean + T * egde_std))
 
     outliers = mask_edges(Δ, 7, False)
 

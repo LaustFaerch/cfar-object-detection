@@ -24,6 +24,7 @@ def k_pdf(x, μ, v, L):
     return pdf
 
 # Numerical integration of the k-distribution using scipy.integrate
+# I cannot find a nice expression for the CDF, so i'm using the pdf instead.
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
@@ -74,6 +75,9 @@ def _mom_estimation_simple(image, L):
 def _kd_cfar(image, μ, v, L, pde):
     init = 5 * μ  # initial guess of the algorithm
     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
+
+    # TODO: should we consider the mean level here? E.g., outliers = image>edge_mean*T
+    # Why / Why not? The method is currently 'global' but only within a small window (glocal? semi-global? regional?)
     outliers = image > T
     return outliers
 
