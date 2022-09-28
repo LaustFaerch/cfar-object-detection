@@ -20,7 +20,7 @@ def _calc_prob(p, n, m, lnQ):
 
     z = -2 * r * lnQ
     P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)
-
+    # comment
     return P
 
 
