@@ -9,9 +9,10 @@ def _calc_prob(p, n, m, lnQ):
     Implementation of e.q. 17/18/19 in the article
 
     NB.: Precision of chi2.cdf is such that the minimum value of around 1e-16
-    This means that we cannot use the CFAR filter for PFA values below 1e-16
-    For lower PFA values, consider reimplementing the chi2.cdf function. e.g. see answer here:
+    This means that we cannot use the chi2.cdf filter for PFA values below 1e-16
+    So to increase precision, we use the survival function (chi2.sf) instead.
     https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats
+    https://stackoverflow.com/questions/11725115/p-value-from-chi-sq-test-statistic-in-python
 
     """
     r = 1 - ((2 * p**2 - 1) / (6 * p)) * (1 / n + 1 / m - 1 / (n + m))
@@ -19,8 +20,8 @@ def _calc_prob(p, n, m, lnQ):
         (1 / n**2) + (1 / m**2) - (1 / (n + m)**2)) * (1 / r**2)
 
     z = -2 * r * lnQ
-    P = (1 - ω2) * chi2.cdf(z, df=p**2) + ω2 * chi2.cdf(z, df=p**2 + 4)
-    # comment
+    P = (1 - ω2) * chi2.sf(z, df=p**2) + ω2 * chi2.sf(z, df=p**2 + 4)
+    
     return P
 
 
@@ -103,7 +104,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
     lnQ = lnk + lnΔ
 
     Pw = _calc_prob(p, n, m, lnQ)
-    Δ = (1 - Pw) <= pfa
+    Δ = Pw <= pfa
 
     # we are only interested in bright outliers
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
