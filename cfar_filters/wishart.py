@@ -3,26 +3,32 @@ import numpy as np
 from scipy.stats import chi2
 from .fast_functions import fast_edge_mean
 from .utils import smells_like, db2in, mask_edges
+from scipy.ndimage import median_filter
+from scipy.optimize import fmin
 
-def _calc_prob(p, n, m, lnQ):
+
+def _calc_dist_params(p, n, m, lnQ):
     """
-    Implementation of e.q. 17/18/19 in the article
-
-    NB.: Precision of chi2.cdf is such that the minimum value of around 1e-16
-    This means that we cannot use the chi2.cdf filter for PFA values below 1e-16
-    So to increase precision, we use the survival function (chi2.sf) instead.
-    https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats
-    https://stackoverflow.com/questions/11725115/p-value-from-chi-sq-test-statistic-in-python
+    Implementation of e.q. 17+18 in the article
 
     """
     r = 1 - ((2 * p**2 - 1) / (6 * p)) * (1 / n + 1 / m - 1 / (n + m))
     ω2 = -p**2 / 4 * (1 - 1 / r)**2 + (p**2 * (p**2 - 1) / (24)) * (
         (1 / n**2) + (1 / m**2) - (1 / (n + m)**2)) * (1 / r**2)
 
-    z = -2 * r * lnQ
-    P = (1 - ω2) * chi2.sf(z, df=p**2) + ω2 * chi2.sf(z, df=p**2 + 4)
-    
-    return P
+    return r, ω2
+
+def _find_threshold(T, p, ω2, pfa):
+    """
+    Implements equation 19 and numerically calculates threshold
+    NB.: Precision of chi2.cdf is around 1e-16
+    This means that we cannot use the chi2.cdf for very small PFA values
+    So to increase precision, we use the survival function (chi2.sf) instead.
+    https://stackoverflow.com/questions/6298105/precision-of-cdf-in-scipy-stats
+    https://stackoverflow.com/questions/11725115/p-value-from-chi-sq-test-statistic-in-python
+    """
+    dist = (2 * chi2.sf(T, df=p**2) - ω2 * chi2.sf(T, df=p**2 + 4))
+    return np.abs(dist - pfa)
 
 
 def detector(image, mask=0, pfa=1e-12, enl=10):
@@ -82,7 +88,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
                       category=UserWarning)
 
     n = 1 * enl     # no looks center pixel
-    m = 144 * enl   # no looks edge cell
+    m = 144 * enl   # no looks edge cell (value determined by the no samples used in fast_edge_mean() )
     p = 2           # no dimensions (bands) in image
 
     eps = db2in(-100)   # just a small value
@@ -101,13 +107,14 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     lnk = p * ((m + n) * np.log(m + n) - m * np.log(m) - n * np.log(n))
     lnΔ = (n * np.log(detX) + m * np.log(detY)) - ((n + m) * np.log(detXY))
-    lnQ = lnk + lnΔ
+    lnQ = median_filter(lnk + lnΔ, size=(3, 3))  # apply filter to remove noise
 
-    Pw = _calc_prob(p, n, m, lnQ)
-    Δ = Pw <= pfa
+    r, ω2 = _calc_dist_params(p, n, m)
+    T = fmin(_find_threshold, 30, disp=False, args=(p, ω2, pfa))[0]
+    Δ = (-2 * r * lnQ) >= T
 
     # we are only interested in bright outliers
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
-    outliers = mask_edges((Δ * bright_filter), 7, False)
+    outliers = mask_edges((Δ * bright_filter), 8, False)
 
     return outliers
