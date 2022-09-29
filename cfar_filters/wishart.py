@@ -1,10 +1,10 @@
 import warnings
 import numpy as np
 from scipy.stats import chi2
+from scipy.optimize import fmin
+from scipy.ndimage import median_filter
 from .fast_functions import fast_edge_mean
 from .utils import smells_like, db2in, mask_edges
-from scipy.ndimage import median_filter
-from scipy.optimize import fmin
 
 
 def _calc_dist_params(p, n, m):
