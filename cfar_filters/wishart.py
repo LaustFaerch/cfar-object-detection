@@ -7,7 +7,7 @@ from scipy.ndimage import median_filter
 from scipy.optimize import fmin
 
 
-def _calc_dist_params(p, n, m, lnQ):
+def _calc_dist_params(p, n, m):
     """
     Implementation of e.q. 17+18 in the article
 
