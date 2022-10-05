@@ -10,6 +10,9 @@ def _gamma_pfa(t, L):
     # scipy.stats.gammaincc is already regualized with 1/gamma(L)
     return gammaincc(L, t * L)
 
+"""
+Solves E.q. 17 in D.J. Crisp
+"""
 def _gamma_pfa_minimization(x, pfa, L):
     return np.abs(_gamma_pfa(x, L) - pfa)
 
