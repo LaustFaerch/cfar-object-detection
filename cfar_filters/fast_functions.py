@@ -14,7 +14,6 @@ of 15 pixels ensure that we have more than 140 pixels for estimating the clutter
 Larger outer window will mean slower execution.
 
 
-
 """
 
 import numpy as np

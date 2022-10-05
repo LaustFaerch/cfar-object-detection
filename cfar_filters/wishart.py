@@ -45,8 +45,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
     Known issues:
         -  Missed detections in heteorogeneous areas
         -  False detections on edges (eg. between land and water)
-        -  Objects cannot be separated (eg. ships/icebergs/islands are all detected the same)
-        -  Objects embedded in rough sea ice is hard to detect
 
     Parameters:
     ----------
@@ -107,13 +105,14 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     lnk = p * ((m + n) * np.log(m + n) - m * np.log(m) - n * np.log(n))
     lnΔ = (n * np.log(detX) + m * np.log(detY)) - ((n + m) * np.log(detXY))
-    lnQ = median_filter(lnk + lnΔ, size=(3, 3))  # apply filter to remove noise
+    lnQ = median_filter(lnk + lnΔ, size=(3, 3))  # remove salt/pepper noise from LnQ
 
     r, ω2 = _calc_dist_params(p, n, m)
     T = fmin(_find_threshold, 30, disp=False, args=(p, ω2, pfa))[0]
     Δ = (-2 * r * lnQ) >= T
 
     # we are only interested in bright outliers
+    # i.e., only keep outliers where both bands are brighter than background
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
     outliers = mask_edges((Δ * bright_filter), 8, False)
 
