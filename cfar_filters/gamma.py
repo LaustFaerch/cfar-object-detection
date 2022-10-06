@@ -18,7 +18,7 @@ def _gamma_pfa_minimization(x, pfa, L):
 
 # Find the required multiplier for a desired PFA level numerically
 def _find_gamma_multiplier(pfa, L):
-    x0 = L * 2  # initial guess
+    x0 = L / 2  # initial guess
     res = minimize(_gamma_pfa_minimization, x0, args=(pfa, L), method='Nelder-Mead', tol=1e-6)
     return res.x[0]
 
