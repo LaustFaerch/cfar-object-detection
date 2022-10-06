@@ -105,7 +105,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     lnk = p * ((m + n) * np.log(m + n) - m * np.log(m) - n * np.log(n))
     lnΔ = (n * np.log(detX) + m * np.log(detY)) - ((n + m) * np.log(detXY))
-    lnQ = median_filter(lnk + lnΔ, size=(3, 3))  # remove salt/pepper noise from LnQ
+    lnQ = lnk + lnΔ
 
     r, ω2 = _calc_dist_params(p, n, m)
     T = fmin(_find_threshold, 30, disp=False, args=(p, ω2, pfa))[0]
