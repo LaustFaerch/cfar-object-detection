@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from skimage import morphology
 
 def db2in(image):
     """
@@ -39,7 +40,7 @@ def in2db(image):
 def smells_like(image, K=1000):
     """
     Often, SAR images are visualized in decibel scale.
-    However, processing are often executed in linear intensity scale.
+    However, processing is often executed in linear intensity scale.
     This leads to errors, if eg. a decibel image is given as an input to a function expecting linear intensity.
     This function executes a "soft test" in order to try to guess what format the input is.
     The function is used to warn about likely wrong formats.
