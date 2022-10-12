@@ -32,8 +32,8 @@ enl = 10  # Sentinel-1 EW ENL is around 10
 # defining a mask will make execution faster. Mask is boolean
 mask = (np.nansum(image, axis=0)!=0)
 
-# single-band detectors must be applied to individual bands (i.e., on HH / HV)
-# gamma, lognorm, and k-distribution are single-channel
+# there are 3 single-channel detectors cfar.lognormal.detector(), cfar.gamma.detector(), and cfar.kdistribution.detector()
+# single-channel detectors must be applied to individual bands (i.e., on HH / HV)
 gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=pfa, enl=enl)
 gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=pfa, enl=enl)
 
