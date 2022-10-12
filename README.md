@@ -21,6 +21,7 @@ TODO:
 
 ## Usage
 
+```
 import cfar_filters as cfar
 
 image = cfar.utils.db2in(decibel_image) # make sure to convert image to intensity
@@ -39,7 +40,7 @@ gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
 k_hh_outliers = cfar.kdistribution.detector(image[0,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
 k_hv_outliers = cfar.kdistribution.detector(image[1,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
 k_outliers = k_hh_outliers&k_hv_outliers
-
+```
 
 ## References
 C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53, no. 9. 1997.
