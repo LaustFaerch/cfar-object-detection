@@ -2,7 +2,8 @@
 cfar-object-detection :ice_cube: :mag:
 ======
 Iceberg detection in SAR imagery using CFAR filters.
-The code is tailored for 40m pixel spacing C- and L-band imagery.
+The code is tailored for 40m pixel spacing SAR imagery.
+Detectors tested on dual-band ALOS-2 and Sentinel-1 imagery
  
 ## Overview
 Includes 4 different CFAR detectors:
@@ -20,7 +21,25 @@ TODO:
 
 ## Usage
 
-## Citations
+import cfar_filters as cfar
+
+image = cfar.utils.db2in(decibel_image) # make sure to convert image to intensity
+
+# detectors
+wishart_outliers = cfar.wishart.detector(image, mask=mask, pfa=pfa, enl=enl)
+
+lognorm_hh_outliers = cfar.lognormal.detector(in2db(image[0,...]), mask=mask, pfa=pfa)
+lognorm_hv_outliers = cfar.lognormal.detector(in2db(image[1,...]), mask=mask, pfa=pfa)
+lognorm_outliers = lognorm_hh_outliers&lognorm_hv_outliers
+
+gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=pfa, enl=enl)
+gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=pfa, enl=enl)
+gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
+
+k_hh_outliers = cfar.kdistribution.detector(image[0,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
+k_hv_outliers = cfar.kdistribution.detector(image[1,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
+k_outliers = k_hh_outliers&k_hv_outliers
+
 
 ## References
 C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53, no. 9. 1997.

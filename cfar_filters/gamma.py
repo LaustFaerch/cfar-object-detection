@@ -21,6 +21,9 @@ def _find_gamma_multiplier(pfa, L):
     x0 = 3  # initial guess
     res = minimize(_gamma_pfa_minimization, x0, args=(pfa, L), method='Nelder-Mead', tol=1e-6)
 
+    # TODO: I have has some convergence issues.
+    # Maybe test if using another method than 'Nelder-Mead' gives better results
+    # For now, I have just added a warning
     if res.x[0] == x0:
         warnings.warn('gamma CFAR might not have converged', category=UserWarning)
 
