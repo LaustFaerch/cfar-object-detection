@@ -36,6 +36,13 @@ def in2db(image):
     """
     return 10 * np.log10(np.absolute(image))
 
+"""
+simple mom method for estimating the ENL
+theoretically only works for gamma, but are commonly used for other distributions as well
+"""
+def calc_enl(samples):
+    return np.nanmean(samples)**2 / np.nanstd(samples)**2
+
 
 def smells_like(image, K=1000):
     """
