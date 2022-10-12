@@ -21,7 +21,7 @@ TODO:
 
 ## Usage
 
-```
+```Python
 import cfar_filters as cfar
 
 image = cfar.utils.db2in(decibel_image) # make sure to convert image to intensity
