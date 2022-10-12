@@ -16,30 +16,44 @@ And 2 different detection transformations:
 * DPolRad (A. Marino 2016)
 * Normalized Intensity Sum (C. Liu 2015)
 
-TODO:
-* Add examples
 
 ## Usage
 
 ```Python
 import cfar_filters as cfar
 
-image = cfar.utils.db2in(decibel_image) # make sure to convert image to intensity
+# convert between intensity/decibel using cfar.utils:
+image = cfar.utils.db2in(decibel_image)
 
-# detectors
-wishart_outliers = cfar.wishart.detector(image, mask=mask, pfa=pfa, enl=enl)
+# detectors need to be tuned with a desired pfa-level and ENL
+pfa = 1e-9
+enl = 10  # Sentinel-1 EW ENL is around 10
 
-lognorm_hh_outliers = cfar.lognormal.detector(in2db(image[0,...]), mask=mask, pfa=pfa)
-lognorm_hv_outliers = cfar.lognormal.detector(in2db(image[1,...]), mask=mask, pfa=pfa)
-lognorm_outliers = lognorm_hh_outliers&lognorm_hv_outliers
+# defining a mask will make execution faster. Mask is boolean
+mask = (np.nansum(image, axis=0)!=0)
 
+# single-band detectors must be applied to individual bands (i.e., on HH / HV)
+# gamma, lognorm, and k-distribution are single-channel
 gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=pfa, enl=enl)
 gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=pfa, enl=enl)
+
+# merge the channels using boolean logic
 gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
 
-k_hh_outliers = cfar.kdistribution.detector(image[0,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
-k_hv_outliers = cfar.kdistribution.detector(image[1,...], mask=mask, N=block_size, offset=False, pfa=pfa, enl=enl)
-k_outliers = k_hh_outliers&k_hv_outliers
+# Wishart-detector is dual-channel
+wishart_outliers = cfar.wishart.detector(image, mask=mask, pfa=pfa, enl=enl)
+
+# transformations can be applied to transform dual-channel to single-channel
+normsum_transform = cfar.normsum.transform(image, mask=mask)
+
+# before applying a detector, we need to estimate the enl of the transformed image
+# below, we only estimate enl using the background clytter (i.e., pixels with intensity below 2xmedian)
+nis_enl = cfar.utils.calc_enl(np.where(normsum_transform<np.nanmedian(normsum_transform)*2, normsum_transform, np.nan))
+
+# we can now apply a detector to the transformed image
+nis_outliers = cfar.gamma.detector(normsum_transform, mask=mask, pfa=pfa, enl=nis_enl)
+
+
 ```
 
 ## References
