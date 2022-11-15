@@ -11,7 +11,7 @@ def transform(image, mask=0):
 
     Specifically, this function implements e.q. 10 in the paper.
 
-    This method is similar to the polarimetric whitening filter (PWF). 
+    This method is similar to the polarimetric whitening filter (PWF).
 
     Parameters:
     ----------
