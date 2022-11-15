@@ -9,7 +9,9 @@ def transform(image, mask=0):
     Based on the normalized intensity sum decision variable suggested by Chen Liu in:
     Liu, “A Dual-Polarization Ship Detection Algorithm,” Def. Res. Dev. Canada, no. November, 2015.
 
-    Specifically, this function implements e.q. 10 in the paper
+    Specifically, this function implements e.q. 10 in the paper.
+
+    This method is similar to the polarimetric whitening filter (PWF). 
 
     Parameters:
     ----------
