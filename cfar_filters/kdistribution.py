@@ -17,9 +17,15 @@ def k_pdf(x, μ, v, L):
     c = x**((L + v - 2) / 2)
     d = kn(n, 2 * np.sqrt(L * v * x / μ))
 
-    pdf = a * b * c * d
+    if np.any(np.array([a, b, c, d]) == 0):
+        return 0
+    else:
 
-    pdf = np.where(np.isnan(pdf), 0, pdf)
+        pdf = a * b * c * d
+
+        pdf = np.where(np.isnan(pdf), 0, pdf)
+
+        return pdf
 
     return pdf
 
