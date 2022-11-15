@@ -35,7 +35,7 @@ def _kd_cfar(image, μ, v, L, pde):
     outliers = image > T
     return outliers
 
-def detector(image, mask=0, N=200, pfa=1e-12, L=10):
+def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
 
@@ -63,7 +63,7 @@ def detector(image, mask=0, N=200, pfa=1e-12, L=10):
         Block size for the estimation (tile size in the paper)
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
-    L : float
+    enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
     Returns:
     ----------
@@ -109,9 +109,9 @@ def detector(image, mask=0, N=200, pfa=1e-12, L=10):
             else:
                 # MoM estimation of the v-parameter
                 μ = np.nanmean(sub_block_image)
-                v = μ**2 * (L + 1) / (np.var(sub_block_image) * L - μ**2)
+                v = μ**2 * (enl + 1) / (np.var(sub_block_image) * enl - μ**2)
 
-                outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
+                outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, enl, pde)
 
     outliers = np.where(mask, outliers, False)
     return outliers
