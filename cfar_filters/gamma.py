@@ -11,7 +11,7 @@ def _gamma_pfa(t, L):
     return gammaincc(L, t * L)
 
 """
-Solves E.q. 17 in D.J. Crisp
+Solves E.q. 17 in D.J. Crisp, E.q., 10.14 in Oliver/Quegan
 """
 def _gamma_pfa_minimization(x, pfa, L):
     return np.abs(_gamma_pfa(x, L) - pfa)
@@ -68,10 +68,10 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
 
-    # check if the image format is correct
-    if smells_like(image[None, ...]) != 'intensity':
-        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
-                      category=UserWarning)
+    # # check if the image format is correct
+    # if smells_like(image[None, ...]) != 'intensity':
+    #     warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
+    #                   category=UserWarning)
 
     multiplier = _find_gamma_multiplier(pfa, enl)
 
