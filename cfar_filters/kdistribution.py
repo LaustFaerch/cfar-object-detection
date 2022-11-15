@@ -28,70 +28,30 @@ def k_pdf(x, μ, v, L):
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
-# The full MoM estimation suggested by C. Liu
-def _mom_estimation_full(image):
-
-    median = np.nanmedian(image)
-    image = np.where(image > 3 * median, np.nan, image)
-
-    μ = np.nanmean(image)
-
-    I2 = np.nanmean((image)**2)  # 2nd raw sample moment
-    I3 = np.nanmean((image)**3)  # 3rd raw sample moment
-
-    W2 = I2 / μ**2  # e.q. 11
-    W3 = (I3 / μ**3) / (W2)  # e.q. 11
-
-    b = (W3 - 4 * W2 - 1)
-    D = b**2 - 16 * W2
-
-    # If the discriminant is below zero, we have no solution
-    if D <= 0:
-        return μ, np.nan, np.nan
-
-    # e.q. 12
-    Vplus = 1 / 4 * (-b + np.sqrt(D))
-    Vminus = 1 / 4 * (-b - np.sqrt(D))
-    V = max(Vplus, Vminus)
-    U = W2 / V
-
-    # e.q. 10
-    L = 1 / (U - 1)
-    v = 1 / (V - 1)
-
-    return μ, v, L
-
-# Simple MoM estimation using the system ENL
-# V is then estimated based on e.q. 6 in the paper
-def _mom_estimation_simple(image, L):
-
-    μ = np.nanmean(image)
-    K = np.nanmean(image**2) / μ**2
-    v = (L + 1) / (L * K - L - 1)
-
-    return μ, v, L
-
 # K-distribution CFAR on image blocks
 def _kd_cfar(image, μ, v, L, pde):
     init = 5 * μ  # initial guess of the algorithm
     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
-
-    # TODO: should we consider the mean level here? E.g., outliers = image>edge_mean*T
-    # Why / Why not? The method is currently 'global' but only within a small window (glocal? semi-global? regional?)
     outliers = image > T
     return outliers
 
-
-def detector(image, mask=0, N=200, pfa=1e-12, offset=False, enl=10):
+def detector(image, mask=0, N=200, pfa=1e-12, L=10):
     """
     CFAR filter implementation based on the K-normal distribution.
-    The filter is based on the paper:
+
+    Estimation of the K-PDF parameters is based on a known L-value
+    (9-11 for Sentinel-1 EW)
+    (15 for ALOS-2 Wide Beam)
+
+    The shape-parameter v is estimated using a MoM estimator mentioned in this paper:
+    C. Wesche and W. Dierking, “Iceberg signatures and detection in SAR images in two test regions of the Weddell Sea,
+    Antarctica,”
+    J. Glaciol., vol. 58, no. 208, pp. 325–339, 2012, doi: 10.3189/2012J0G11J020.
+
+    The filter estimates the K-distribution parameters on NxN blocks of the image to improve execution speed.
+    This approach was suggested here:
     C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,”
     Can. J. Remote Sens., vol. 44, no. 4, pp. 299-310, 2018, doi: 10.1080/07038992.2018.1491789.
-
-    The filter estimated the K-distribution parameters on NxN blocks of the image.
-    Parameters are estimated using the MoM method suggested in the paper
-
 
     Parameters:
     ----------
@@ -103,18 +63,8 @@ def detector(image, mask=0, N=200, pfa=1e-12, offset=False, enl=10):
         Block size for the estimation (tile size in the paper)
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
-    offset: np.bool
-        Flag used to select whether the sub blocks should be offset to 0
-        The MoM estimation works best of the distribution starts near 0
-        Set offset = True for the dpolrad transform
-        Set Offset = False for the NIS transform
-
-    enl : float
+    L : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
-        If using a linear transformation image (e.g. DPolRad/NIS), then remember that the number of looks are influenced
-        From C. Liu: "When a combined decision variable is derived from Equation (1),
-        the maximum possible value of L is the sum of the number of looks of the channels."
-
     Returns:
     ----------
     outliers : numpy.ndarray(bool) (X,Y)
@@ -134,9 +84,10 @@ def detector(image, mask=0, N=200, pfa=1e-12, offset=False, enl=10):
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    vmin, vmax = 1, 50
-    Lmin, Lmax = 1, enl
-    req_valid_samples = 2500  # minimum number of valid samples in block
+    # apply mask
+    image = np.where(mask, image, np.nan)
+
+    req_valid_samples = 1000  # minimum number of valid samples in block
 
     outliers = np.zeros_like(image).astype(np.bool)
     pde = 1 - (pfa)  # probability of true detection
@@ -156,30 +107,9 @@ def detector(image, mask=0, N=200, pfa=1e-12, offset=False, enl=10):
             if no_valid_samples <= req_valid_samples:
                 outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
             else:
-
-                if offset:
-                    # offset to ensure pdf starts near 0 (which is important for the mom estimation)
-                    # use offset for dpolrad transform, NOT for the chenliu transform
-                    sub_block_image = sub_block_image - np.nanmin(sub_block_image)
-
-                # ESTIMATE PARAMETERS FOR THE K-DISTRIBUTION
-                μ, v, L = _mom_estimation_full(sub_block_image)
-
-                # if the mom estimation above fails, use a simpler estimation based on the system ENL
-                if np.any(np.isnan(np.array([v, L]))):
-                    μ, v, L = _mom_estimation_simple(sub_block_image, enl)
-
-                # If v is negative it is likely that the equations broke down
-                # due to the denominator in the simple mom estimation
-                # If v is very large, the distribution is likely near gamma
-                # In both cases use vmax.
-                if v <= vmin or v >= vmax:
-                    v = vmax
-                # L cannot be negative
-                if L <= 0:
-                    L = Lmax
-                # L cannot be smaller than 1 or larger than p*ENL
-                L = min(max(Lmin, L), Lmax)
+                # MoM estimation of the v-parameter
+                μ = np.nanmean(sub_block_image)
+                v = μ**2 * (L + 1) / (np.var(sub_block_image) * L - μ**2)
 
                 outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, L, pde)
 
