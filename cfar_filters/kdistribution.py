@@ -44,9 +44,9 @@ def detector(image, mask=0, N=200, pfa=1e-12, L=10):
     (15 for ALOS-2 Wide Beam)
 
     The shape-parameter v is estimated using a MoM estimator mentioned in this paper:
-    C. Wesche and W. Dierking, 
+    C. Wesche and W. Dierking,
     “Iceberg signatures and detection in SAR images in two test regions of the Weddell Sea, Antarctica,”
-    J. Glaciol., vol. 58, no. 208, pp. 325–339, 2012, doi: 10.3189/2012J0G11J020.
+    J. Glaciol., vol. 58, no. 208, pp. 325-339, 2012, doi: 10.3189/2012J0G11J020.
 
     The filter estimates the K-distribution parameters on NxN blocks of the image to improve execution speed.
     This approach was suggested here:
