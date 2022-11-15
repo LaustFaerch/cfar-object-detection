@@ -1,7 +1,7 @@
 import warnings
 import scipy
 import numpy as np
-from .utils import smells_like, mask_edges
+from .utils import smells_like
 from .fast_functions import test_window, train_window
 
 def _gengamma_minimize(t, gengamma_params, pde):
