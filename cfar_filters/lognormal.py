@@ -6,7 +6,7 @@ from .utils import smells_like, mask_edges
 from .fast_functions import fast_edge_mean, fast_edge_std
 
 
-# This functions assymes standardized data
+# This functions assumes standardized data
 def _gaussian_pfa(t):
     return 0.5 - 0.5 * erf(t / np.sqrt(2))
 

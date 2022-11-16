@@ -20,11 +20,8 @@ def k_pdf(x, μ, v, L):
     if np.any(np.array([a, b, c, d]) == 0):
         return 0
     else:
-
         pdf = a * b * c * d
-
         pdf = np.where(np.isnan(pdf), 0, pdf)
-
         return pdf
 
     return pdf
@@ -49,12 +46,12 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     (9-11 for Sentinel-1 EW)
     (15 for ALOS-2 Wide Beam)
 
-    The shape-parameter v is estimated using a MoM estimator mentioned in this paper:
+    The order-parameter (v) is estimated using a MoM estimator mentioned in this paper:
     C. Wesche and W. Dierking,
     “Iceberg signatures and detection in SAR images in two test regions of the Weddell Sea, Antarctica,”
     J. Glaciol., vol. 58, no. 208, pp. 325-339, 2012, doi: 10.3189/2012J0G11J020.
 
-    The filter estimates the K-distribution parameters on NxN blocks of the image to improve execution speed.
+    The filter estimates the K-distribution parameters on NxN tiles of the image to improve execution speed.
     This approach was suggested here:
     C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,”
     Can. J. Remote Sens., vol. 44, no. 4, pp. 299-310, 2018, doi: 10.1080/07038992.2018.1491789.
@@ -66,7 +63,7 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
     N : Integer
-        Block size for the estimation (tile size in the paper)
+        Tile size for the estimation (tile size in the paper)
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
     enl : float
@@ -115,8 +112,8 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
             else:
                 # MoM estimation of the v-parameter
                 μ = np.nanmean(sub_block_image)
-                v = μ**2 * (enl + 1) / (np.var(sub_block_image) * enl - μ**2)
-
+                v = μ**2 * (enl + 1) / (np.nanvar(sub_block_image) * enl - μ**2)
+                v = max(min(v, 50), 0)  # clip v - see C. Liu 2018 page 303
                 outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, enl, pde)
 
     outliers = np.where(mask, outliers, False)
