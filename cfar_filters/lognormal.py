@@ -17,6 +17,7 @@ def _gaussian_pfa_minimization(x, pfa):
 def _find_gaussian_multiplier(pfa):
     res = minimize(_gaussian_pfa_minimization, 5, args=(pfa), method='Nelder-Mead', tol=1e-6)
     return res.x[0]
+    
 
 def detector(image, mask=0, pfa=1e-12):
     """
