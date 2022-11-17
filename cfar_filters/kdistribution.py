@@ -1,7 +1,13 @@
+import warnings
 import numpy as np
-from scipy.special import gamma, kn
+import pandas as pd
+
 import scipy.integrate as integrate
+from scipy.special import gamma, kn
 from scipy.optimize import fmin
+
+from .utils import smells_like, mask_edges
+from .fast_functions import fast_edge_mean, fast_edge_std
 
 # implementation of the K-distribution pdf
 # E.q. 8.21 in Oliver/Quegan:
@@ -24,21 +30,27 @@ def k_pdf(x, μ, v, L):
         pdf = np.where(np.isnan(pdf), 0, pdf)
         return pdf
 
-    return pdf
-
 # Numerical integration of the k-distribution using scipy.integrate
 # I cannot find a nice expression for the CDF, so i'm using the pdf instead.
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
-# K-distribution CFAR on image blocks
-def _kd_cfar(image, μ, v, L, pde):
-    init = 5 * μ  # initial guess of the algorithm
-    T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
-    outliers = image > T
-    return outliers
+# # K-distribution CFAR on image blocks
+# def _kd_cfar(image, μ, v, L, pde):
+#     init = 5 * μ  # initial guess of the algorithm
+#     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
+#     outliers = image > T
+#     return outliers
 
-def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
+# Get K-CFAR threshold
+def get_threshold(row, enl, pfa):
+    v = row['v']
+    pde = 1 - pfa
+    T = np.round(fmin(_k_minimize, 5, disp=False, args=(1, v, enl, pde))[0], 2)
+    return np.round(T, 2)
+
+
+def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
 
@@ -51,10 +63,11 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     “Iceberg signatures and detection in SAR images in two test regions of the Weddell Sea, Antarctica,”
     J. Glaciol., vol. 58, no. 208, pp. 325-339, 2012, doi: 10.3189/2012J0G11J020.
 
-    The filter estimates the K-distribution parameters on NxN tiles of the image to improve execution speed.
-    This approach was suggested here:
-    C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,”
-    Can. J. Remote Sens., vol. 44, no. 4, pp. 299-310, 2018, doi: 10.1080/07038992.2018.1491789.
+    To speed up execution, a look-up table of thresholds based on min/max order parameters are calculated first.
+    This is similar to the method suggested by C. Brekke:
+    C. Brekke, Automatic ship detection based on satellite SAR, no. May. 2009.
+    The threshold is calculated at predined steps, which are set by the N parameter. Higher N means finer increments.
+    We do not interpolate from the LUT, but uses the nearest suitable value.
 
     Parameters:
     ----------
@@ -63,7 +76,7 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
     N : Integer
-        Tile size for the estimation (tile size in the paper)
+        Number of v-estimations
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
     enl : float
@@ -82,39 +95,41 @@ def detector(image, mask=0, N=200, pfa=1e-12, enl=10):
     if image.shape != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
+    # check if the image format is correct
+    if smells_like(image[None, ...]) != 'decibel':
+        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
+                      category=UserWarning)
 
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    # apply mask
-    image = np.where(mask, image, np.nan)
+    # large v means gamma distributed clutter. v cannot be negative
+    vmin, vmax = 1, 20
 
-    req_valid_samples = 1000  # minimum number of valid samples in block
+    # calculate the LUT based on the PFA and ENL
+    v_lut = pd.DataFrame(columns=['v'])
+    v_lut['v'] = np.linspace(vmin, vmax, N)
+    v_lut['T'] = v_lut.apply(lambda row: get_threshold(row, enl, pfa), axis=1)
 
-    outliers = np.zeros_like(image).astype(np.bool)
-    pde = 1 - (pfa)  # probability of true detection
+    # calculate the clutter mean and variance
+    edge_mean = fast_edge_mean(image, mask)
+    egde_var = fast_edge_std(image, mask)**2
 
-    n_rows, n_cols = np.asarray(image.shape[0:2]) // N + (np.mod(np.asarray(image.shape[0:2]), N) > 0) * 1
+    # MoM estimation of the order parameter (v)
+    order_param = edge_mean**2 * (enl + 1) / (egde_var * enl - edge_mean**2)
+    order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-50
+    order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-50
 
-    # loop over blocks (tiles)
-    for x in range(0, n_rows):
-        for y in range(0, n_cols):
+    # get the LUT index for fast accessing
+    v_idx = np.round((order_param * vmax) / N)
+    v_idx = np.where(np.isnan(v_idx), 0, v_idx).astype(np.uint)
 
-            sub_block_image = image[x * N:x * N + N, y * N:y * N + N]
+    # get the desired threshold for each pixel in the image
+    threshold = np.asarray(v_lut)[:, 1][v_idx]
+    # apply the detection
+    Δ = image > (threshold * edge_mean)
 
-            # count number of pixels not 0 and nan
-            no_valid_samples = np.sum(~np.isnan(sub_block_image) & (sub_block_image != 0))
+    outliers = mask_edges(Δ, 7, False)
 
-            # if block is masked then skip the block
-            if no_valid_samples <= req_valid_samples:
-                outliers[x * N:x * N + N, y * N:y * N + N] = np.zeros_like(sub_block_image) > 0
-            else:
-                # MoM estimation of the v-parameter
-                μ = np.nanmean(sub_block_image)
-                v = μ**2 * (enl + 1) / (np.nanvar(sub_block_image) * enl - μ**2)
-                v = max(min(v, 50), 0)  # clip v - see C. Liu 2018 page 303
-                outliers[x * N:x * N + N, y * N:y * N + N] = _kd_cfar(sub_block_image, μ, v, enl, pde)
-
-    outliers = np.where(mask, outliers, False)
     return outliers
