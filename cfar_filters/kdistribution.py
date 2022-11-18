@@ -54,7 +54,7 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     """
     CFAR filter implementation based on the K-normal distribution.
 
-    Estimation of the K-PDF parameters is based on a known L-value
+    Estimation of the K-PDF parameters is based on a known enl-value
     (9-11 for Sentinel-1 EW)
     (15 for ALOS-2 Wide Beam)
 
@@ -96,8 +96,8 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
     # check if the image format is correct
-    if smells_like(image[None, ...]) != 'decibel':
-        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
+    if smells_like(image[None, ...]) != 'intensity':
+        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
     # if no mask is given, assume all pixels are valid
