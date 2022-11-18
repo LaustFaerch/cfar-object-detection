@@ -117,7 +117,7 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     egde_var = fast_edge_std(image, mask)**2
 
     # MoM estimation of the order parameter (v)
-    order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl-edge_mean**2), np.nan)
+    order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
     order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-50
     order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-50
 
