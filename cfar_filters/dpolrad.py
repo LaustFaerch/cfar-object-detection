@@ -103,7 +103,9 @@ def detector(image, mask=0, pfa=1e-12):
 
     # estimate the parameters for the generalized gamma distribution
     # exclude values smaller than 50 x mean and larger than 0
-    samples = idpolrad[np.where((idpolrad < 50 * np.mean(idpolrad)) & (idpolrad > 0))]
+    # using all samples is very slow - so we estimate the parameters based on a random subset
+    N = 10000
+    samples = np.random.choice(idpolrad[np.where((idpolrad < 50 * np.mean(idpolrad)) & (idpolrad > 0))], N)
     gengamma_params = scipy.stats.gengamma.fit(samples)
 
     # calculate the threshold corresponding to the desired PFA
