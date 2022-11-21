@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from skimage import morphology
 
 def db2in(image):
     """
