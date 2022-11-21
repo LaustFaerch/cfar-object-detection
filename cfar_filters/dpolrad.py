@@ -105,6 +105,7 @@ def detector(image, mask=0, pfa=1e-12):
     # exclude values smaller than 50 x mean and larger than 0
     # using all samples is very slow - so we estimate the parameters based on a random subset
     N = 10000
+    np.random.seed(0)  # seed random state so same pixels are used each time
     samples = np.random.choice(idpolrad[np.where((idpolrad < 50 * np.mean(idpolrad)) & (idpolrad > 0))], N)
     gengamma_params = scipy.stats.gengamma.fit(samples)
 
