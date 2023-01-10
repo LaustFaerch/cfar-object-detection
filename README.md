@@ -6,13 +6,11 @@ The code is tailored for 40m pixel spacing SAR imagery.
 Detectors tested on dual-band ALOS-2 and Sentinel-1 imagery
  
 ## Overview
-Includes 4 different CFAR detectors:
+Includes 5 different CFAR detectors and contrast enhancement techniques for iceberg detection:
 * WISHART (K. Conradsen 2003)
 * LogNormal (D. J. Crisp 2004)
 * Gamma (D. J. Crisp 2004)
 * K-Distribution (C. Liu 2018)
-
-And 2 different detection transformations:
 * DPolRad (A. Marino 2016)
 * Normalized Intensity Sum (C. Liu 2015)
 
@@ -21,6 +19,8 @@ And 2 different detection transformations:
 
 ```Python
 import cfar_filters as cfar
+
+# load your SAR image as a numpy array
 
 # convert between intensity/decibel using cfar.utils:
 image = cfar.utils.db2in(decibel_image)
@@ -33,15 +33,16 @@ enl = 10  # Sentinel-1 EW ENL is around 10
 mask = (np.nansum(image, axis=0)!=0)
 
 # there are 3 single-channel detectors cfar.lognormal.detector(), cfar.gamma.detector(), and cfar.kdistribution.detector()
-# single-channel detectors must be applied to individual bands (i.e., on HH / HV)
+# single-channel detectors must be applied to individual bands (i.e., on HH / HV) and then the results must be combined later
 gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=pfa, enl=enl)
 gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=pfa, enl=enl)
 
 # merge the channels using boolean logic
 gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
 
-# Wishart-detector is dual-channel
+# Wishart and idpolrad detectors is dual-channel
 wishart_outliers = cfar.wishart.detector(image, mask=mask, pfa=pfa, enl=enl)
+idpolrad_outliers = cfar.dpolrad.detector(image, mask=mask, pfa=pfa)
 
 # transformations can be applied to transform dual-channel to single-channel
 normsum_transform = cfar.normsum.transform(image, mask=mask)
