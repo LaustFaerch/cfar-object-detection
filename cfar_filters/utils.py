@@ -35,11 +35,23 @@ def in2db(image):
     """
     return 10 * np.log10(np.absolute(image))
 
-"""
-simple mom method for estimating the ENL
-theoretically only works for gamma, but are commonly used for other distributions as well
-"""
+
 def calc_enl(samples):
+    """
+    simple mom method for estimating the ENL
+    theoretically only works for gamma, but are commonly used for other distributions as well
+
+    Parameters:
+    ----------
+    samples : numpy.ndarray (N)
+        single dimensional numpy array containing the samples used for ENL estimation
+
+    Returns:
+    ----------
+    enl : float
+        ENL estimate
+
+    """
     return np.nanmean(samples)**2 / np.nanstd(samples)**2
 
 
