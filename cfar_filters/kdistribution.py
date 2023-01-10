@@ -66,8 +66,10 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     To speed up execution, a look-up table of thresholds based on min/max order parameters are calculated first.
     This is similar to the method suggested by C. Brekke:
     C. Brekke, Automatic ship detection based on satellite SAR, no. May. 2009.
-    The threshold is calculated at predined steps, which are set by the N parameter. Higher N means finer increments.
+    The threshold is calculated at predefined steps, which are set by the N parameter. Higher N means finer increments.
     We do not interpolate from the LUT, but uses the nearest suitable value.
+    The order parameter (v) is clipped between 1-20. This is based on the observed range of the parameter but might need
+    refinement for other images.
 
     Parameters:
     ----------
@@ -118,8 +120,8 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
 
     # MoM estimation of the order parameter (v)
     order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
-    order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-50
-    order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-50
+    order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-20
+    order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-20
 
     # get the LUT index for fast accessing
     v_idx = np.round((order_param * vmax) / N)
