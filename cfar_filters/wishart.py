@@ -42,9 +42,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     ENL values for Sentinel-1 can be found here:
     https://sentinels.copernicus.eu/web/sentinel/technical-guides/sentinel-1-sar/products-algorithms/level-1-algorithms/ground-range-detected/ew
-    Known issues:
-        -  Missed detections in heteorogeneous areas
-        -  False detections on edges (eg. between land and water)
+
 
     Parameters:
     ----------
