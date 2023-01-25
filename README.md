@@ -34,8 +34,9 @@ mask = (np.nansum(image, axis=0)!=0)
 
 # there are 3 single-channel detectors cfar.lognormal.detector(), cfar.gamma.detector(), and cfar.kdistribution.detector()
 # single-channel detectors must be applied to individual bands (i.e., on HH / HV) and then the results must be combined later
-gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=pfa, enl=enl)
-gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=pfa, enl=enl)
+# if combining the channels using boolean &, then the pfa must be adjusted accordingly
+gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=np.sqrt(pfa), enl=enl)
+gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=np.sqrt(pfa), enl=enl)
 
 # merge the channels using boolean logic
 gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
