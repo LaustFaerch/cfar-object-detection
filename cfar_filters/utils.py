@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from skimage import morphology
 
 def db2in(image):
     """
@@ -60,7 +61,7 @@ def smells_like(image, K=1000):
     Often, SAR images are visualized in decibel scale.
     However, processing is often executed in linear intensity scale.
     This leads to errors, if eg. a decibel image is given as an input to a function expecting linear intensity.
-    This function executes a "soft test" in order to try to guess what format the input is.
+    This function executes a 'soft' test in order to try to guess what format the input is.
     The function is used to warn about likely wrong formats.
 
     Parameters:
@@ -90,6 +91,28 @@ def smells_like(image, K=1000):
         smells_like = 'fishy'
 
     return smells_like
+
+
+def remove_small_objects(image, N):
+    """
+    Remove small binary objects from a binary image
+
+    Parameters:
+    ----------
+    image : numpy.ndarray (X,Y)
+        Image to be masked
+    N : integer
+        minimum object size
+
+    Returns:
+    ----------
+    image : numpy.ndarray (X,Y)
+        cleaned image
+
+    """
+    out = morphology.remove_small_objects(image, N)
+    return out
+
 
 def mask_edges(image, N, fill=False):
     """
