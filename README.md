@@ -22,7 +22,7 @@ import rasterio as rio
 import cfar_filters as cfar
 
 # load your SAR image as a numpy array
-# image format should be dual-band (HH, HV)
+# image format should be a numpy.ndarray(float32) of shape (2,X,Y) with the order: HH, HV
 image_filename = Path('sentinel1-image.tif')
 with rio.open(image_filename) as src:
     in_image = src.read()
