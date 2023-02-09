@@ -7,11 +7,11 @@ Detectors tested on dual-band ALOS-2 and Sentinel-1 imagery
  
 ## Overview
 Includes 5 different CFAR detectors and contrast enhancement techniques for iceberg detection:
-* WISHART (K. Conradsen 2003)
-* LogNormal (D. J. Crisp 2004)
+* Wishart (K. Conradsen 2003)
+* Log-normal (D. J. Crisp 2004)
 * Gamma (D. J. Crisp 2004)
 * K-Distribution (Wesche and Dierking 2012; Brekke 2009)
-* DPolRad (A. Marino 2016)
+* iDPolRad (A. Marino 2016)
 * Normalized Intensity Sum (C. Liu 2015)
 
 
@@ -36,11 +36,11 @@ db_image = cfar.utils.in2db(in_image)
 # initialize detector setting
 init = {
         'detector' : 'gamma', # use: 'gamma', 'lognorm', 'k', 'wishart', 'nis', 'idpolrad'
-        'method' : 'AND', # use: 'AND', 'OR'
+        'method' : 'AND', # use: 'AND', 'OR'. Not used by 'wishart', 'nis', and 'idpolrad'
         'pfa' :  1e-15, # recommended range: 1e-21 - 1e-3
         'enl' : 10.7, # use sensor ENL, 10.7 for Sentinel-1 EW
         'minsize' : 2, # objects smaller than this size are removed
-        'sensitivity' : 40 # sensitivity for the k-algorithm. Higher number means slower and more precise
+        'sensitivity' : 40 # Only used by the k-algorithm. Higher number means slower and more precise
         }
 
 # run detection
