@@ -1,1 +1,1 @@
-from cfar_filters import detect
+from cfar_filters import detector
