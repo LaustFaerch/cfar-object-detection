@@ -44,9 +44,9 @@ init = {
         }
 
 # run detection
-gamma_and_outliers = cfar.detect(db_image, mask, **init)
+gamma_and_outliers = cfar.detector.run(db_image, mask, **init)
 init.update({'method': 'OR'})
-gamma_or_outliers = cfar.detect(sen1_image, mask, **init)
+gamma_or_outliers = cfar.detector.run(sen1_image, mask, **init)
 
 ```
 
