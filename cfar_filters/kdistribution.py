@@ -35,13 +35,6 @@ def k_pdf(x, μ, v, L):
 def _k_minimize(t, μ, v, L, pde):
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
-# # K-distribution CFAR on image blocks
-# def _kd_cfar(image, μ, v, L, pde):
-#     init = 5 * μ  # initial guess of the algorithm
-#     T = fmin(_k_minimize, init, disp=False, args=(μ, v, L, pde))[0]
-#     outliers = image > T
-#     return outliers
-
 # Get K-CFAR threshold
 def get_threshold(row, enl, pfa):
     v = row['v']
