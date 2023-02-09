@@ -10,7 +10,7 @@ Includes 5 different CFAR detectors and contrast enhancement techniques for iceb
 * WISHART (K. Conradsen 2003)
 * LogNormal (D. J. Crisp 2004)
 * Gamma (D. J. Crisp 2004)
-* K-Distribution (C. Liu 2018)
+* K-Distribution (Wesche and Dierking 2012; Brekke 2009)
 * DPolRad (A. Marino 2016)
 * Normalized Intensity Sum (C. Liu 2015)
 
@@ -18,43 +18,35 @@ Includes 5 different CFAR detectors and contrast enhancement techniques for iceb
 ## Usage
 
 ```Python
+import rasterio as rio
 import cfar_filters as cfar
 
 # load your SAR image as a numpy array
+# image format should be dual-band (HH, HV)
+image_filename = Path('sentinel1-image.tif')
+with rio.open(image_filename) as src:
+    in_image = src.read()
 
-# convert between intensity/decibel using cfar.utils:
-image = cfar.utils.db2in(decibel_image)
+# define mask - could also include landmask
+mask = np.nansum(in_image, axis=0)!=0
 
-# detectors need to be tuned with a desired pfa-level and ENL
-pfa = 1e-9
-enl = 10  # Sentinel-1 EW ENL is around 10
+# convert between intensity/decibel using .utils
+db_image = cfar.utils.in2db(in_image)
 
-# defining a mask will make execution faster. Mask is boolean
-mask = (np.nansum(image, axis=0)!=0)
+# initialize detector setting
+init = {
+        'detector' : 'gamma', # use: 'gamma', 'lognorm', 'k', 'wishart', 'nis', 'idpolrad'
+        'method' : 'AND', # use: 'AND', 'OR'
+        'pfa' :  1e-15, # recommended range: 1e-21 - 1e-3
+        'enl' : 10.7, # use sensor ENL, 10.7 for Sentinel-1 EW
+        'minsize' : 2, # objects smaller than this size are removed
+        'sensitivity' : 40 # sensitivity for the k-algorithm. Higher number means slower and more precise
+        }
 
-# there are 3 single-channel detectors cfar.lognormal.detector(), cfar.gamma.detector(), and cfar.kdistribution.detector()
-# single-channel detectors must be applied to individual bands (i.e., on HH / HV) and then the results must be combined later
-# if combining the channels using boolean &, then the pfa must be adjusted accordingly
-gamma_hh_outliers = cfar.gamma.detector(image[0,...], mask=mask, pfa=np.sqrt(pfa), enl=enl)
-gamma_hv_outliers = cfar.gamma.detector(image[1,...], mask=mask, pfa=np.sqrt(pfa), enl=enl)
-
-# merge the channels using boolean logic
-gamma_outliers = gamma_hh_outliers&gamma_hv_outliers
-
-# Wishart and idpolrad detectors is dual-channel
-wishart_outliers = cfar.wishart.detector(image, mask=mask, pfa=pfa, enl=enl)
-idpolrad_outliers = cfar.dpolrad.detector(image, mask=mask, pfa=pfa)
-
-# transformations can be applied to transform dual-channel to single-channel
-normsum_transform = cfar.normsum.transform(image, mask=mask)
-
-# before applying a detector, we need to estimate the enl of the transformed image
-# below, we only estimate enl using the background clytter (i.e., pixels with intensity below 2xmedian)
-nis_enl = cfar.utils.calc_enl(np.where(normsum_transform<np.nanmedian(normsum_transform)*2, normsum_transform, np.nan))
-
-# we can now apply a detector to the transformed image
-nis_outliers = cfar.gamma.detector(normsum_transform, mask=mask, pfa=pfa, enl=nis_enl)
-
+# run detection
+gamma_and_outliers = cfar.detect(db_image, mask, **init)
+init.update({'method': 'OR'})
+gamma_or_outliers = cfar.detect(sen1_image, mask, **init)
 
 ```
 
@@ -63,7 +55,9 @@ C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53,
 
 C. Liu, “A Dual-Polarization Ship Detection Algorithm,” Def. Res. Dev. Canada, no. November, 2015.
 
-C. Liu, “Method for Fitting K-Distributed Probability Density Function to Ocean Pixels in Dual-Polarization SAR,” Can. J. Remote Sens., vol. 44, no. 4, pp. 299–310, 2018, doi: 10.1080/07038992.2018.1491789.
+C. Brekke, "Automatic ship detection based on satellite SAR", Tech. Rep. May, Norwegian Defence Research Establishment (FFI), 2009.
+
+C. Wesche and W. Dierking, “Iceberg signatures and detection in SAR images in two test regions of the Weddell Sea, Antarctica,” J. Glaciol., vol. 58, no. 208, pp. 325-339, 2012, doi: 10.3189/2012J0G11J020.
 
 D. J. Crisp, “The State-of-the-Art in Ship detection in Synthetic Aperture Radar Imagery,” 2004.
 
