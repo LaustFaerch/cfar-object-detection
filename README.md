@@ -66,3 +66,12 @@ K. Conradsen, A. A. Nielsen, J. Schou, and H. Skriver, “A test statistic in th
 A. Marino, W. Dierking, and C. Wesche, “A Depolarization Ratio Anomaly Detector to Identify Icebergs in Sea Ice Using Dual-Polarization SAR Images,” IEEE Trans. Geosci. Remote Sens., vol. 54, no. 9, pp. 5602–5615, 2016, doi: 10.1109/TGRS.2016.2569450.
 
 I. H. Soldal, W. Dierking, A. A. Korosov, and A. Marino, “Automatic detection of small icebergs in fast ice using satellite Wide-Swath SAR images,” Remote Sens., vol. 11, no. 7, pp. 1-24, 2019, doi: 10.3390/rs11070806.
+
+## Cite
+
+If using this, please use the following citation:
+
+Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in L- and C-band SAR Imagery of the Labrador Sea, The Cryosphere Discuss. [preprint], https://doi.org/10.5194/tc-2023-17, in review, 2023. 
+
+## License
+The material is made available under the GNU General Public License v3.0: Copyright 2023, Laust Færch, of CIRFA - The Arctic University of Norway, UiT. All rights reserved.
