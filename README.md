@@ -43,10 +43,10 @@ init = {
         'sensitivity' : 40 # Only used by the k-algorithm. Higher number means slower and more precise
         }
 
-# run detection
+# run detection (image should be in decibel)
 gamma_and_outliers = cfar.detector.run(db_image, mask, **init)
 init.update({'method': 'OR'})
-gamma_or_outliers = cfar.detector.run(sen1_image, mask, **init)
+gamma_or_outliers = cfar.detector.run(db_image, mask, **init)
 
 ```
 
