@@ -23,6 +23,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+import warnings
 import numpy as np
 
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
@@ -86,6 +87,7 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         outliers = dpolrad.detector(image, mask=mask, pfa=pfa)
 
     else:
+        warnings.warn(f'Detector not recognized. Use one of the following: \'gamma\', \'lognorm\', \'k\', \'wishart\', \'nis\', \'idpolrad\'. You gave the following detector: {detector}', category=UserWarning)
         return 0
 
     return utils.remove_small_objects(outliers, minsize)
