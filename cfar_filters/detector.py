@@ -3,7 +3,8 @@ CFAR Detection on 40-meter SAR data.
 
 If using this code, please use the following citation:
 Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: 
-A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in L- and C-band SAR Imagery of the Labrador Sea, 
+A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in 
+L- and C-band SAR Imagery of the Labrador Sea, 
 The Cryosphere Discuss. [preprint], https://doi.org/10.5194/tc-2023-17, in review, 2023. 
 
 
@@ -87,7 +88,9 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         outliers = dpolrad.detector(image, mask=mask, pfa=pfa)
 
     else:
-        warnings.warn(f'Detector not recognized. Use one of the following: \'gamma\', \'lognorm\', \'k\', \'wishart\', \'nis\', \'idpolrad\'. You gave the following detector: {detector}', category=UserWarning)
+        warnings.warn(f'Detector not recognized. Use one of the following: \
+                      \'gamma\', \'lognorm\', \'k\', \'wishart\', \'nis\', \'idpolrad\'. \
+                      You gave the following detector: {detector}', category=UserWarning)
         return 0
 
     return utils.remove_small_objects(outliers, minsize)
