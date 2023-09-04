@@ -20,8 +20,8 @@ def k_pdf(x, μ, v, L):
 
     a = 2 / (gamma(L) * gamma(v))
     b = (L * v / μ)**((L + v) / 2)
-    c = x**((L + v - 2) / 2)
-    d = kn(n, 2 * np.sqrt(L * v * x / μ))
+    c = x**((L + v - 2) / 2)  # TODO: supress RuntimeWarning: invalid value encountered in double_scalars
+    d = kn(n, 2 * np.sqrt(L * v * x / μ))  # TODO: supress RuntimeWarning: invalid value encountered in sqrt
 
     if np.any(np.array([a, b, c, d]) == 0):
         return 0

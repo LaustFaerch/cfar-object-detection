@@ -28,6 +28,7 @@ import warnings
 import numpy as np
 
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
+# TODO: Add check for method == 'AND' or 'OR'
 
 def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, sensitivity=40):
 
