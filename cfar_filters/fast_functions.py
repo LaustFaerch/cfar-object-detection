@@ -115,9 +115,11 @@ def _edge_kernel_std(x, m, ri, ro):
 
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:], u2, u2)', parallel=True, nopython=True)
-def fast_edge_mean(x, m, ri, ro):
+def fast_edge_mean(x, m, wi, wo):
+    ri, ro = wi // 2, wo // 2
     return _edge_kernel_mean(x, m, ri, ro)
 
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:], u2, u2)', parallel=True, nopython=True)
-def fast_edge_std(x, m, ri, ro):
+def fast_edge_std(x, m, wi, wo):
+    ri, ro = wi // 2, wo // 2
     return _edge_kernel_std(x, m, ri, ro)
