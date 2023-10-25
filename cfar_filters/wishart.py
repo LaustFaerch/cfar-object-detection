@@ -68,7 +68,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
-        
+
     # check if shapes are correct
     if (len(image.shape) != 3) or (image.shape[0] != 2):
         raise ValueError(f'Input image must be of shape [2, X, Y] but is of shape {image.shape}')

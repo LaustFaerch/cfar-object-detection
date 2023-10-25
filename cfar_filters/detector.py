@@ -2,10 +2,10 @@
 CFAR Detection on 40-meter SAR data.
 
 If using this code, please use the following citation:
-Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: 
-A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in 
-L- and C-band SAR Imagery of the Labrador Sea, 
-The Cryosphere Discuss. [preprint], https://doi.org/10.5194/tc-2023-17, in review, 2023. 
+Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.:
+A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in
+L- and C-band SAR Imagery of the Labrador Sea,
+The Cryosphere Discuss. [preprint], https://doi.org/10.5194/tc-2023-17, in review, 2023.
 
 
 Copyright (C) 2023  Laust Færch
@@ -46,7 +46,7 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         raise ValueError((f'Maximum supported window size is 20. You gave wo = {wo} \
                             If you want larger windows, edit the neighbourhood and ranges in fast_functions.\
                             Be aware; complexity increases with the square of the neighborhood size!'))
-    
+
     # check datatypes are correct
     if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
         raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
