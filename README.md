@@ -1,9 +1,8 @@
 
 cfar-object-detection :ice_cube: :mag:
 ======
-Iceberg detection in SAR imagery using CFAR filters.
-The code is tailored for 40m pixel spacing SAR imagery.
-Detectors tested on dual-band ALOS-2 and Sentinel-1 imagery
+Constant False Alarm Rate (CFAR) detection for SAR images.
+Developed for detecting icebergs in Sentinel-1 and ALOS-2 imagery.
  
 ## Overview
 Includes 5 different CFAR detectors and contrast enhancement techniques for iceberg detection:
@@ -14,8 +13,49 @@ Includes 5 different CFAR detectors and contrast enhancement techniques for iceb
 * iDPolRad (A. Marino 2016)
 * Normalized Intensity Sum (C. Liu 2015)
 
+The implementation have been tested on Sentinel-1 EW and IW, ALOS-2 Wide Beam, and ICEYE Stripmap images.
+
 
 ## Usage
+
+For CFAR detection on single-band images use the individual detectors:
+
+```Python
+import rasterio as rio
+import cfar_filters as cfar
+
+# load your SAR image as a numpy array
+# image format should be a numpy.ndarray(float32) of shape (2,X,Y) with the order: HH, HV
+image_filename = Path('sentinel1-image.tif')
+with rio.open(image_filename) as src:
+    in_image = src.read()
+
+# define mask - could also include landmask
+mask = np.nansum(in_image, axis=0)!=0
+
+pfa = 1e-15  # probability of false alarm rate
+enl = 10.7  # equivalent number of looks of the image
+wi = 9  # diameter of the guard area
+wo = 15  # diameter of the clutter estimation area
+
+# using the gamma detector
+gamma_outliers = cfar.gamma.detector(in_image, mask, pfa, enl, wi, wo)
+
+# using the lognormal detector
+db_image = cfar.utils.in2db(in_image)  # convert image to decibel using .utils
+lognormal_outliers = cfar.lognormal.detector(db_image, mask, pfa, wi, wo)
+
+# using the k detector
+N = 40  # number of steps for the LUT
+k_outliers = cfar.kdistribution.detector(image, mask, N, pfa, enl, wi, wo)
+
+# remove objects smaller than 3 using .utils
+gamma_outliers = cfar.utils.remove_small_objects(gamma_outliers, 2)
+
+```
+
+For CFAR detection on dual-band images use the cfar.detector.run:
+
 
 ```Python
 import rasterio as rio
@@ -40,7 +80,9 @@ init = {
         'pfa' :  1e-15, # recommended range: 1e-21 - 1e-3
         'enl' : 10.7, # use sensor ENL, 10.7 for Sentinel-1 EW
         'minsize' : 2, # objects smaller than this size are removed
-        'sensitivity' : 40 # Only used by the k-algorithm. Higher number means slower and more precise
+        'sensitivity' : 40, # Only used by the k-algorithm. Higher number means slower and more precise
+        'wi' : 9 , # diameter of the guard area
+        'wo' : 15  # diameter of the clutter estimation area
         }
 
 # run detection (image should be in decibel)
