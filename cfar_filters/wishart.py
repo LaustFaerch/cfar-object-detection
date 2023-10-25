@@ -76,11 +76,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape[1:]}'))
 
-    # check if the image format
-    if smells_like(image) != 'intensity':
-        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
-                      category=UserWarning)
-
     n = 1 * enl     # no looks center pixel
     m = np.pi * (((wo - 1) / 2) ** 2 - ((wi - 1) / 2) ** 2) * enl   # no looks edge cell (determined by the no samples)
     p = 2           # no dimensions (bands) in image

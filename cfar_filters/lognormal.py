@@ -55,11 +55,6 @@ def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
 
-    # check if the image format is correct
-    if smells_like(image[None, ...]) != 'decibel':
-        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
-                      category=UserWarning)
-
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 
     T = _find_gaussian_multiplier(pfa)

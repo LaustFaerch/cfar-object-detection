@@ -26,26 +26,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import warnings
 import numpy as np
-
+from .utils import smells_like
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
 
 def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, sensitivity=40, wi=9, wo=15):
+
+    # check if the image format
+    if smells_like(image) != 'decibel':
+        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image)}',
+                      category=UserWarning)
 
     # check method is valid
     if method not in ['AND', 'OR']:
         raise ValueError((f'Method not recognized. Method should be either AND or OR, you gave {method}'))
     # check pfa within reasonable limits
     if (pfa <= 0) | (pfa >= 1):
-        raise ValueError((f'PFA must be in interval (0, 1), you gave {pfa}'))
+        raise ValueError((f'PFA must be in interval (0, 1), you gave: {pfa}'))
 
     # check that window sizes are valid
     if wi > wo:
         raise ValueError((f'Outer window must be larger than inner window \
                             wi: {wi}, wo {wo}'))
     if wo > 20:
-        raise ValueError((f'Maximum supported window size is 20. You gave wo = {wo} \
+        warnings.warn((f'Maximum supported window size is 20. You gave wo = {wo} \
                             If you want larger windows, edit the neighbourhood and ranges in fast_functions.\
-                            Be aware; complexity increases with the square of the neighborhood size!'))
+                            Be aware; complexity increases with the square of the neighborhood size!'),
+                      category=UserWarning)
 
     # check datatypes are correct
     if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
