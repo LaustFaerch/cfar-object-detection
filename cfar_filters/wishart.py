@@ -31,7 +31,7 @@ def _find_threshold(T, p, ω2, pfa):
     return np.abs(dist - pfa)
 
 
-def detector(image, mask=0, pfa=1e-12, enl=10):
+def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     """
     CFAR filter implementation based on the Wishart distributions.
     Based on this paper:
@@ -54,6 +54,10 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         Probability of false alarm. Should be somewhere between 0-1
     enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
+    wi : integer
+        Inner Window Diameter - also called guard area
+    wo : integer
+        Outer Window Diameter - also called clutter estimation area
 
     Returns:
     ----------
@@ -83,16 +87,26 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
                       category=UserWarning)
 
+    # check that window sizes are valid
+    if wi > wo:
+        raise ValueError((f'Outer window must be larger than inner window \
+                          wi: {wi}, wo {wo}'))
+    if wo > 20:
+        raise ValueError((f'Maximum allowable window size is 20. \
+                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
+                           But be aware complexity increases with the square of the neighborhood size. \
+                          wo {wo}'))
+
     n = 1 * enl     # no looks center pixel
-    m = 144 * enl   # no looks edge cell (value determined by the no samples used in fast_edge_mean() )
+    m = np.pi * (((wo - 1) / 2) ** 2 - ((wi - 1) / 2) ** 2) * enl   # no looks edge cell (determined by the no samples)
     p = 2           # no dimensions (bands) in image
 
     eps = db2in(-100)   # just a small value
 
     S11_s = np.where(mask, n * image[0, ...], np.nan)  # S11 Ship
     S22_s = np.where(mask, n * image[1, ...], np.nan)  # S22 Ship
-    S11_o = m * fast_edge_mean(image[0, ...], mask)  # S11 Ocean
-    S22_o = m * fast_edge_mean(image[1, ...], mask)  # S22 Ocean
+    S11_o = m * fast_edge_mean(image[0, ...], mask, wi, wo)  # S11 Ocean
+    S22_o = m * fast_edge_mean(image[1, ...], mask, wi, wo)  # S22 Ocean
 
     S11_o = np.where(S11_o == 0, eps, S11_o)
     S22_o = np.where(S22_o == 0, eps, S22_o)
@@ -112,6 +126,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
     # we are only interested in bright outliers
     # i.e., only keep outliers where both bands are brighter than background
     bright_filter = ((S11_o / m) < (S11_s / n)) & ((S22_o / m) < (S22_s / n))
-    outliers = mask_edges((Δ * bright_filter), 8, False)
+    outliers = mask_edges((Δ * bright_filter), 20, False)
 
     return outliers
