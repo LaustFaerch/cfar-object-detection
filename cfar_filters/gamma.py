@@ -65,7 +65,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     if image.shape != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
-    
+
     # check if the image format
     if smells_like(image) != 'intensity':
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
