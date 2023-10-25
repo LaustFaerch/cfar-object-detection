@@ -1,5 +1,5 @@
 """
-CFAR Detection on 40-meter SAR data.
+CFAR Detection on dual-band SAR data.
 
 If using this code, please use the following citation:
 Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.:
@@ -30,6 +30,37 @@ from .utils import smells_like
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
 
 def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, sensitivity=40, wi=9, wo=15):
+    """
+    Run CFAR detection on dual-band SAR data
+
+    Parameters:
+    ----------
+    image : numpy.ndarray(float32) (2,X,Y)
+        SAR image in linear intensity format
+    mask : numpy.ndarray(bool) (X,Y)
+        Mask for the image.
+    detector : string
+        CFAR detector used. Choose between: \'gamma\', \'lognorm\', \'k\', \'wishart\', \'nis\', \'idpolrad\'.
+    method: string
+        Method for boolean combination of detectors. Choose between \'AND\' or \'OR\'.
+    pfa : float
+        Probability of false alarm. Should be in interval (0,1)
+    enl : float
+        Equivalent Number of Looks of the SAR image. Typically between 5-20 depending on the sensor
+    minsize : integer
+        Objects this size or smaller are assumed to be noise and are removed.
+    sensitiviy : integer
+        Number of v-estimations for the K detector LUT. Larger number means slower but more precise calculations.
+    wi : integer
+        Inner Window Diameter - also called guard area
+    wo : integer
+        Outer Window Diameter - also called clutter estimation area
+
+    Returns:
+    ----------
+    outliers : numpy.ndarray(bool) (X,Y)
+        Binary outlier classification
+    """
 
     # check if the image format
     if smells_like(image) != 'decibel':
@@ -58,6 +89,14 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
     if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
         raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
+
+    # check dimensions of image
+    if (len(image.shape) == 2):
+        raise TypeError('Input image appear to be single-band. For single band images, please call the individual \
+                        detector functions directly. e.g.: outliers = gamma.detector(image, mask, pfa, enl, wi, wo)')
+
+    if (len(image.shape) != 3) or (image.shape[0] != 2):
+        raise ValueError(f'Input image must be dual-band of shape [2, X, Y] but is of shape {image.shape}')
 
     if detector == 'gamma':
         image = utils.db2in(image)
