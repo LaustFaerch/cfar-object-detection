@@ -85,6 +85,6 @@ def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
 
     Δ = (image > (edge_mean + T * egde_std))
 
-    outliers = mask_edges(Δ, 7, False)
+    outliers = mask_edges(Δ, 20, False)
 
     return outliers
