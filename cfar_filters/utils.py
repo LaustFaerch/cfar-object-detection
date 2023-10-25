@@ -76,7 +76,11 @@ def smells_like(image, K=1000):
     smells_like : string
         'decibel'/'intensity'/'fishy'
     """
-    samples = pd.DataFrame(image[:, np.random.choice(image.shape[1], K), np.random.choice(image.shape[2], K)].T)
+
+    if len(image.shape) == 2:
+        samples = pd.DataFrame(image[np.random.choice(image.shape[0], K), np.random.choice(image.shape[1], K)].T)
+    else:
+        samples = pd.DataFrame(image[:, np.random.choice(image.shape[1], K), np.random.choice(image.shape[2], K)].T)
 
     describe = samples.describe()
 
