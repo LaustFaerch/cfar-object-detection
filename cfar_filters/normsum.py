@@ -40,6 +40,10 @@ def transform(image, mask=0, wi=9, wo=15):
     if image.shape[1:] != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape[1:]}'))
+    # check if the image format
+    if smells_like(image) != 'intensity':
+        warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
+                      category=UserWarning)
 
     HH_edge = fast_edge_mean(image[0, ...], mask, wi, wo)
     HV_edge = fast_edge_mean(image[1, ...], mask, wi, wo)

@@ -54,6 +54,10 @@ def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
     if image.shape != mask.shape:
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
+    # check if the image format
+    if smells_like(image) != 'decibel':
+        warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image)}',
+                      category=UserWarning)
 
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 
