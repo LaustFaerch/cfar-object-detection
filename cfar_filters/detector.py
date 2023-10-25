@@ -78,8 +78,8 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
     if wi > wo:
         raise ValueError((f'Outer window must be larger than inner window \
                             wi: {wi}, wo {wo}'))
-    if wo > 20:
-        warnings.warn((f'Maximum supported window size is 20. You gave wo = {wo} \
+    if wo > 40:
+        warnings.warn((f'Maximum supported window size is 40. You gave wo = {wo} \
                             If you want larger windows, edit the neighbourhood and ranges in fast_functions.\
                             Be aware; complexity increases with the square of the neighborhood size!'),
                       category=UserWarning)
@@ -153,7 +153,7 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
     elif detector == 'idpolrad':
         image = utils.db2in(image)
 
-        outliers = dpolrad.detector(image, mask=mask, pfa=pfa, wi=wi, wo=wo)
+        outliers = dpolrad.detector(image, mask=mask, pfa=pfa, test_window=wi, train_window=wo)
 
     else:
         warnings.warn(f'Detector not recognized. Use one of the following: \
