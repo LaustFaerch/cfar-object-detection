@@ -2,12 +2,12 @@ import warnings
 import scipy
 import numpy as np
 from .utils import smells_like
-from .fast_functions import test_window, train_window
+from .fast_functions import fast_edge_mean
 
 def _gengamma_minimize(t, gengamma_params, pde):
     return np.abs(scipy.stats.gengamma.cdf(t, *gengamma_params) - pde)
 
-def transform(image, mask=0):
+def transform(image, mask=0, test_window=3, train_window=40):
     """
     Dual-Pol Ratio Anomaly Detector Transformation (DPolRAD)
     this function implements equation 2 in the paper
@@ -23,6 +23,10 @@ def transform(image, mask=0):
         SAR image in linear intensity format
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
+    test_window : integer
+        diameter of the test window
+    train_window : integer
+        diameter of the train window
 
     Returns:
     ----------
@@ -30,16 +34,16 @@ def transform(image, mask=0):
         DPolRad Transform
     """
 
-    HV_target = test_window(image[1, ...], mask)  # test window
-    HV_clutter = train_window(image[1, ...], mask)  # train window
-    HH_clutter = train_window(image[0, ...], mask)  # train window
+    HV_target = fast_edge_mean(image[1, ...], mask, 0, test_window)  # test window
+    HV_clutter = fast_edge_mean(image[1, ...], mask, 0, train_window)  # train window
+    HH_clutter = fast_edge_mean(image[0, ...], mask, 0, train_window)  # train window
 
     HH_clutter = np.where(HH_clutter == 0, np.nan, HH_clutter)  # dont divide by 0
     transform = (HV_target - HV_clutter) / (HH_clutter)
 
     return transform
 
-def detector(image, mask=0, pfa=1e-12):
+def detector(image, mask=0, pfa=1e-12, test_window=3, train_window=40):
     """
     HV Intensity Dual-Pol Ratio Anomaly Detector (IDPolRAD)
 
@@ -63,6 +67,10 @@ def detector(image, mask=0, pfa=1e-12):
         Mask for the image.
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
+    test_window : integer
+        diameter of the test window
+    train_window : integer
+        diameter of the train window
 
     Returns:
     ----------
@@ -92,8 +100,13 @@ def detector(image, mask=0, pfa=1e-12):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
                       category=UserWarning)
 
+    # check that window sizes are valid
+    if test_window > train_window:
+        raise ValueError((f'train window must be larger than test_window \
+                          test_window: {test_window}. train window {train_window}'))
+
     # calculate the dpolrad transform
-    dpolrad = transform(image, mask=mask)
+    dpolrad = transform(image, mask, test_window, train_window)
     # multiply with HV to get contrast enhancement
     idpolrad = image[1, ...] * dpolrad
     # if dpolrad is negative, Idpolrad is set to zero (A. Marino Sec. IV C)
