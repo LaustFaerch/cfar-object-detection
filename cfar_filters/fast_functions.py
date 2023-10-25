@@ -43,7 +43,7 @@ def _edge_kernel_mean(x, m, ri, ro):
         for i in range(-20, 21):
             for ii in range(-20, 21):
                 # if pixel within the radius limits and not nan
-                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
+                if (ri <= np.sqrt(i**2 + ii**2) <= ro) & ~np.isnan(x[i, ii]):
                     cumul += x[i, ii]
                     no_samples += 1
         if no_samples == 0:
@@ -63,7 +63,7 @@ def _edge_kernel_std(x, m, ri, ro):
         for i in range(-20, 21):
             for ii in range(-20, 21):
                 # if pixel within the radius limits and not nan
-                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
+                if (ri <= np.sqrt(i**2 + ii**2) <= ro) & ~np.isnan(x[i, ii]):
                     cumul += x[i, ii]
                     no_samples += 1
         mean = nb.float32(cumul / no_samples)
@@ -71,7 +71,7 @@ def _edge_kernel_std(x, m, ri, ro):
         cumul = 0
         for i in range(-20, 21):
             for ii in range(-20, 21):
-                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
+                if (ri <= np.sqrt(i**2 + ii**2) <= ro) & ~np.isnan(x[i, ii]):
                     cumul += (x[i, ii] - mean)**2
         return nb.float32(np.sqrt(cumul / no_samples))
     else:
