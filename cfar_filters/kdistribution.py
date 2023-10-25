@@ -43,7 +43,7 @@ def get_threshold(row, enl, pfa):
     return np.round(T, 2)
 
 
-def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
+def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
     """
     CFAR filter implementation based on the K-normal distribution.
 
@@ -76,6 +76,11 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
         Probability of false alarm. Should be somewhere between 0-1
     enl : float
         Equavalent number of looks for the SAR image (normally 9-11 for Sentinel-1 EW)
+    wi : integer
+        Inner Window Diameter - also called guard area
+    wo : integer
+        Outer Window Diameter - also called clutter estimation area
+
     Returns:
     ----------
     outliers : numpy.ndarray(bool) (X,Y)
@@ -95,6 +100,16 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
+    # check that window sizes are valid
+    if wi > wo:
+        raise ValueError((f'Outer window must be larger than inner window \
+                          wi: {wi}, wo {wo}'))
+    if wo > 20:
+        raise ValueError((f'Maximum allowable window size is 20. \
+                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
+                           But be aware complexity increases with the square of the neighborhood size. \
+                          wo {wo}'))
+
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
@@ -108,8 +123,8 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     v_lut['T'] = v_lut.apply(lambda row: get_threshold(row, enl, pfa), axis=1)
 
     # calculate the clutter mean and variance
-    edge_mean = fast_edge_mean(image, mask)
-    egde_var = fast_edge_std(image, mask)**2
+    edge_mean = fast_edge_mean(image, mask, wi, wo)
+    egde_var = fast_edge_std(image, mask, wi, wo)**2
 
     # MoM estimation of the order parameter (v)
     order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
@@ -125,6 +140,6 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10):
     # apply the detection
     Δ = image > (threshold * edge_mean)
 
-    outliers = mask_edges(Δ, 7, False)
+    outliers = mask_edges(Δ, 20, False)
 
     return outliers
