@@ -30,7 +30,7 @@ def _find_gamma_multiplier(pfa, L):
     return res.x[0]
 
 
-def detector(image, mask=0, pfa=1e-12, enl=10):
+def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     """
     CFAR filter implementation based on the gamma distribution.
     For further details, please see Section 5.2 in this report:
@@ -44,6 +44,10 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         Mask for the image.
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
+    wi : integer
+        Inner Window Diameter - also called guard area
+    wo : integer
+        Outer Window Diameter - also called clutter estimation area
 
     Returns:
     ----------
@@ -68,6 +72,16 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
         raise ValueError((f'Shape of mask must match shape of image. \
                           Mask shape: {mask.shape}. Image shape {image.shape}'))
 
+    # check that window sizes are valid
+    if wi > wo:
+        raise ValueError((f'Outer window must be larger than inner window \
+                          wi: {wi}, wo {wo}'))
+    if wo > 20:
+        raise ValueError((f'Maximum allowable window size is 20. \
+                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
+                           But be aware complexity increases with the square of the neighborhood size. \
+                          wo {wo}'))
+
     # # check if the image format is correct
     # if smells_like(image[None, ...]) != 'intensity':
     #     warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
@@ -75,10 +89,10 @@ def detector(image, mask=0, pfa=1e-12, enl=10):
 
     multiplier = _find_gamma_multiplier(pfa, enl)
 
-    edge_mean = fast_edge_nanmean(image, mask)
+    edge_mean = fast_edge_nanmean(image, mask, wi, wo)
 
     Δ = (image > (edge_mean * multiplier))
 
-    outliers = mask_edges(Δ, 7, False)
+    outliers = mask_edges(Δ, 20, False)
 
     return outliers
