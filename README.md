@@ -3,6 +3,7 @@ cfar-object-detection :ice_cube: :mag:
 ======
 Constant False Alarm Rate (CFAR) detection for SAR images.
 Developed for detecting icebergs in Sentinel-1 and ALOS-2 imagery.
+Implemented using Numba for fast parallel convolutions.
  
 ## Overview
 Includes 5 different CFAR detectors and contrast enhancement techniques for iceberg detection:
@@ -47,7 +48,7 @@ lognormal_outliers = cfar.lognormal.detector(db_image, mask, pfa, wi, wo)
 
 # using the k detector
 N = 40  # number of steps for the LUT
-k_outliers = cfar.kdistribution.detector(image, mask, N, pfa, enl, wi, wo)
+k_outliers = cfar.kdistribution.detector(in_image, mask, N, pfa, enl, wi, wo)
 
 # remove objects smaller than 3 using .utils
 gamma_outliers = cfar.utils.remove_small_objects(gamma_outliers, 2)
@@ -91,6 +92,39 @@ init.update({'method': 'OR'})
 gamma_or_outliers = cfar.detector.run(db_image, mask, **init)
 
 ```
+
+The CFAR clutter estimation windows are round and hollow. Similar to the implementation in this paper, with the exception that the target area is always a single pixel: https://www.researchgate.net/figure/Schematic-of-the-target-guard-and-background-areas-used-in-the-traditional-CFAR_fig1_350936854
+
+The wi and wo parameters control the diameter of the guard area, and the clutter estimation area. E.g., setting wi to 5 and wo to 10 would result in the following CFAR window:
+
+```Python
+array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+       [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+       [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, X, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+       [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+       [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+```
+
+With the center pixel 'X' being compared against all pixels marked with '1', and '0' being the guard area.
+The maximum supported diameter is 20. If wo is set to a value larger than 20, the CFAR window will be cropped to a square of size 41x41. This is to restrict computational cost as the filter calculations is implemented using Numba.
+
+NB: The code will use all available CPU power. Keep this in mind when your CPU goes to 100%. 
 
 ## References
 C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53, no. 9. 1997.
