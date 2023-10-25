@@ -1,7 +1,7 @@
 import warnings
 import scipy
 import numpy as np
-from .utils import smells_like
+from .utils import smells_like, mask_edges
 from .fast_functions import fast_edge_mean
 
 def _gengamma_minimize(t, gengamma_params, pde):
@@ -128,5 +128,8 @@ def detector(image, mask=0, pfa=1e-12, test_window=3, train_window=40):
     T = scipy.optimize.fmin(_gengamma_minimize, init, disp=False, args=(gengamma_params, pde), ftol=1e-21)[0]
 
     outliers = (idpolrad > T)
+
+    outliers = mask_edges(Δ, 20, False)
+
 
     return outliers
