@@ -19,134 +19,106 @@ Larger outer window will mean slower execution.
 import numpy as np
 import numba as nb
 
-# # Corresponding to inner_window_size==9
-# @nb.stencil(neighborhood=((-4, 4), (-4, 4)))
-# def _inner_kernel_mean(x, m):
-#     if m[0, 0]:
-#         cumul = 0
-#         for i in range(-4, 5):
-#             for ii in range(-4, 5):
-#                 cumul += x[i, ii]
-#         return nb.float32(cumul / 81)
-#     else:
-#         return nb.float32(np.nan)
 
 # # Corresponding to outer_window_size==15
 # @nb.stencil(neighborhood=((-7, 7), (-7, 7)))
-# def _outer_kernel_mean(x, m):
+# def _edge_kernel_mean(x, m):
 #     if m[0, 0]:
 #         cumul = 0
 #         for i in range(-7, 8):
 #             for ii in range(-7, 8):
-#                 cumul += x[i, ii]
-#         return nb.float32(cumul / 225)
+#                 # Corresponding to inner_window_size==9
+#                 if (i < -4 or i > 4) or (ii < -4 or ii > 4):
+#                     cumul += x[i, ii]
+#         return nb.float32(cumul / 144)
 #     else:
 #         return nb.float32(np.nan)
 
-# Corresponding to outer_window_size==15
-@nb.stencil(neighborhood=((-7, 7), (-7, 7)))
-def _edge_kernel_mean(x, m):
-    if m[0, 0]:
-        cumul = 0
-        for i in range(-7, 8):
-            for ii in range(-7, 8):
-                # Corresponding to inner_window_size==9
-                if (i < -4 or i > 4) or (ii < -4 or ii > 4):
-                    cumul += x[i, ii]
-        return nb.float32(cumul / 144)
-    else:
-        return nb.float32(np.nan)
+@nb.stencil(neighborhood=((-20, 20), (-20, 20)))
+def _edge_kernel_mean(x, m, ri, ro):
 
-# Corresponding to outer_window_size==15
-@nb.stencil(neighborhood=((-7, 7), (-7, 7)))
-def _edge_kernel_nanmean(x, m):
-    if m[0, 0]:
+    if m[0, 0]:  # if pixel is not masked
         cumul = 0
-        valids = 0
-        for i in range(-7, 8):
-            for ii in range(-7, 8):
-                # Corresponding to inner_window_size==9
-                if (i < -4 or i > 4) or (ii < -4 or ii > 4):
-                    if ~np.isnan(x[i, ii]):
-                        cumul += x[i, ii]
-                        valids += 1
-        if valids == 0:
+        no_samples = 0
+        for i in range(-20, 21):
+            for ii in range(-20, 21):
+                # if pixel within the radius limits and not nan
+                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
+                    cumul += x[i, ii]
+                    no_samples += 1
+        if no_samples == 0:
             return nb.float32(0)
         else:
-            return nb.float32(cumul / valids)
+            return nb.float32(cumul / no_samples)
     else:
         return nb.float32(np.nan)
 
 # Corresponding to outer_window_size==15
-@nb.stencil(neighborhood=((-7, 7), (-7, 7)))
-def _edge_kernel_std(x, m):
-    if m[0, 0]:
+@nb.stencil(neighborhood=((-20, 20), (-20, 20)))
+def _edge_kernel_std(x, m, ri, ro):
+
+    if m[0, 0]:  # if pixel is not masked
         cumul = 0
-        for i in range(-7, 8):
-            for ii in range(-7, 8):
-                # Corresponding to inner_window_size==9
-                if (i < -4 or i > 4) or (ii < -4 or ii > 4):
+        no_samples = 0
+        for i in range(-20, 21):
+            for ii in range(-20, 21):
+                # if pixel within the radius limits and not nan
+                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
                     cumul += x[i, ii]
-        mean = nb.float32(cumul / 144)
+                    no_samples += 1
+        mean = nb.float32(cumul / no_samples)
 
         cumul = 0
-        for i in range(-7, 8):
-            for ii in range(-7, 8):
-                if (i < -4 or i > 4) or (ii < -4 or ii > 4):
+        for i in range(-20, 21):
+            for ii in range(-20, 21):
+                if (ri < np.sqrt(i**2 + ii**2) < ro) & ~np.isnan(x[i, ii]):
                     cumul += (x[i, ii] - mean)**2
-        return nb.float32(np.sqrt(cumul / 144))
+        return nb.float32(np.sqrt(cumul / no_samples))
     else:
         return nb.float32(np.nan)
 
-# Corresponding to test window of size 3
-@nb.stencil(neighborhood=((-1, 1), (-1, 1)))
-def _test_window_mean(x, m):
-    if m[0, 0]:
-        cumul = 0
-        for i in range(-1, 2):
-            for ii in range(-1, 2):
-                cumul += x[i, ii]
-        return nb.float32(cumul / 9)
-    else:
-        return nb.float32(np.nan)
+# # Corresponding to test window of size 3
+# @nb.stencil(neighborhood=((-1, 1), (-1, 1)))
+# def _test_window_mean(x, m):
+#     if m[0, 0]:
+#         cumul = 0
+#         for i in range(-1, 2):
+#             for ii in range(-1, 2):
+#                 cumul += x[i, ii]
+#         return nb.float32(cumul / 9)
+#     else:
+#         return nb.float32(np.nan)
 
-# Corresponding to a training window of size 57
-@nb.stencil(neighborhood=((-28, 28), (-28, 28)))
-def _train_window_mean(x, m):
-    if m[0, 0]:
-        cumul = 0
-        for i in range(-28, 29):
-            for ii in range(-28, 29):
-                cumul += x[i, ii]
-        return nb.float32(cumul / 3249)
-    else:
-        return nb.float32(np.nan)
+# # Corresponding to a training window of size 57
+# @nb.stencil(neighborhood=((-28, 28), (-28, 28)))
+# def _train_window_mean(x, m):
+#     if m[0, 0]:
+#         cumul = 0
+#         for i in range(-28, 29):
+#             for ii in range(-28, 29):
+#                 cumul += x[i, ii]
+#         return nb.float32(cumul / 3249)
+#     else:
+#         return nb.float32(np.nan)
 
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def test_window(x, m):
-    return _test_window_mean(x, m)
+# @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
+# def test_window(x, m):
+#     return _test_window_mean(x, m)
 
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def train_window(x, m):
-    return _train_window_mean(x, m)
+# @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
+# def train_window(x, m):
+#     return _train_window_mean(x, m)
 
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-def fast_edge_mean(x, m):
-    return _edge_kernel_mean(x, m)
+# @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
+# def fast_edge_mean(x, m):
+#     return _edge_kernel_mean(x, m)
 
 # ignore nans - TODO: make this a choice in all functions
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
+@nb.jit('float32[:,:](float32[:,:], boolean[:,:], u2, u2)', parallel=True, nopython=True)
 def fast_edge_nanmean(x, m):
-    return _edge_kernel_nanmean(x, m)
+    return _edge_kernel_mean(x, m)
 
-@nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
+@nb.jit('float32[:,:](float32[:,:], boolean[:,:], u2, u2)', parallel=True, nopython=True)
 def fast_edge_std(x, m):
     return _edge_kernel_std(x, m)
 
-# @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-# def fast_inner_mean(x, m):
-#     return _inner_kernel_mean(x, m)
-
-# @nb.jit('float32[:,:](float32[:,:], boolean[:,:])', parallel=True, nopython=True)
-# def fast_outer_mean(x, m):
-#     return _outer_kernel_mean(x, m)
