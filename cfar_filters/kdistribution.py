@@ -100,16 +100,6 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
-    # check that window sizes are valid
-    if wi > wo:
-        raise ValueError((f'Outer window must be larger than inner window \
-                          wi: {wi}, wo {wo}'))
-    if wo > 20:
-        raise ValueError((f'Maximum allowable window size is 20. \
-                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
-                           But be aware complexity increases with the square of the neighborhood size. \
-                          wo {wo}'))
-
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0

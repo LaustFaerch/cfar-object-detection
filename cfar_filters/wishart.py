@@ -68,13 +68,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     # if no mask is given, assume all pixels are valid
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
-
-    # check datatypes are correct
-    if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
-        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
-    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
-        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
-
+        
     # check if shapes are correct
     if (len(image.shape) != 3) or (image.shape[0] != 2):
         raise ValueError(f'Input image must be of shape [2, X, Y] but is of shape {image.shape}')
@@ -86,16 +80,6 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     if smells_like(image) != 'intensity':
         warnings.warn(f'Input image should be in intensity scale. Image smells like {smells_like(image)}',
                       category=UserWarning)
-
-    # check that window sizes are valid
-    if wi > wo:
-        raise ValueError((f'Outer window must be larger than inner window \
-                          wi: {wi}, wo {wo}'))
-    if wo > 20:
-        raise ValueError((f'Maximum allowable window size is 20. \
-                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
-                           But be aware complexity increases with the square of the neighborhood size. \
-                          wo {wo}'))
 
     n = 1 * enl     # no looks center pixel
     m = np.pi * (((wo - 1) / 2) ** 2 - ((wi - 1) / 2) ** 2) * enl   # no looks edge cell (determined by the no samples)

@@ -48,12 +48,6 @@ def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
     if np.all(mask == 0):
         mask = np.ones_like(image) > 0
 
-    # check datatypes are correct
-    if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
-        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
-    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
-        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
-
     # check if shapes are correct
     if len(image.shape) != 2:
         raise ValueError(f'Input image must be of shape [X, Y] but is of shape {image.shape}')
@@ -65,16 +59,6 @@ def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
     if smells_like(image[None, ...]) != 'decibel':
         warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
-
-    # check that window sizes are valid
-    if wi > wo:
-        raise ValueError((f'Outer window must be larger than inner window \
-                          wi: {wi}, wo {wo}'))
-    if wo > 20:
-        raise ValueError((f'Maximum allowable window size is 20. \
-                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
-                           But be aware complexity increases with the square of the neighborhood size. \
-                          wo {wo}'))
 
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 

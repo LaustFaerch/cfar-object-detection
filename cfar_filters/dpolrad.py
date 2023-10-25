@@ -82,12 +82,6 @@ def detector(image, mask=0, pfa=1e-12, test_window=3, train_window=40):
     if np.all(mask == 0):
         mask = np.ones_like(image[0, ...]) > 0
 
-    # check datatypes are correct
-    if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
-        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
-    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
-        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
-
     # check if shapes are correct
     if (len(image.shape) != 3) or (image.shape[0] != 2):
         raise ValueError(f'Input image must be of shape [2, X, Y] but is of shape {image.shape}')

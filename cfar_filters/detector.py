@@ -28,11 +28,30 @@ import warnings
 import numpy as np
 
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
-# TODO: Add check for method == 'AND' or 'OR'
-
-# TODO: add checks: window sizes must be correct size and positive.
 
 def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, sensitivity=40, wi=9, wo=15):
+
+    # check method is valid
+    if method not in ['AND', 'OR']:
+        raise ValueError((f'Method not recognized. Method should be either AND or OR, you gave {method}'))
+    # check pfa within reasonable limits
+    if (pfa <= 0) | (pfa >= 1):
+        raise ValueError((f'PFA must be in interval (0, 1), you gave {pfa}'))
+
+    # check that window sizes are valid
+    if wi > wo:
+        raise ValueError((f'Outer window must be larger than inner window \
+                            wi: {wi}, wo {wo}'))
+    if wo > 20:
+        raise ValueError((f'Maximum supported window size is 20. You gave wo = {wo} \
+                            If you want larger windows, edit the neighbourhood and ranges in fast_functions.\
+                            Be aware; complexity increases with the square of the neighborhood size!'))
+    
+    # check datatypes are correct
+    if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
+        raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
+    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
+        raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
 
     if detector == 'gamma':
         image = utils.db2in(image)
