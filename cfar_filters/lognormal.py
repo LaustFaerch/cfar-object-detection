@@ -19,7 +19,7 @@ def _find_gaussian_multiplier(pfa):
     return res.x[0]
 
 
-def detector(image, mask=0, pfa=1e-12):
+def detector(image, mask=0, pfa=1e-12, wi=9, wo=15):
     """
     CFAR filter implementation based on the log-normal distribution.
     For further details, please see Section 5.2 in this report:
@@ -33,6 +33,10 @@ def detector(image, mask=0, pfa=1e-12):
         Mask for the image.
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
+    wi : integer
+        Inner Window Diameter - also called guard area
+    wo : integer
+        Outer Window Diameter - also called clutter estimation area
 
     Returns:
     ----------
@@ -62,12 +66,22 @@ def detector(image, mask=0, pfa=1e-12):
         warnings.warn(f'Input image should be in decibel scale. Image smells like {smells_like(image[None, ...])}',
                       category=UserWarning)
 
+    # check that window sizes are valid
+    if wi > wo:
+        raise ValueError((f'Outer window must be larger than inner window \
+                          wi: {wi}, wo {wo}'))
+    if wo > 20:
+        raise ValueError((f'Maximum allowable window size is 20. \
+                          If you want larger windows, you should change the neighbourhood and ranges in fast_functions.\
+                           But be aware complexity increases with the square of the neighborhood size. \
+                          wo {wo}'))
+
     image = (image - np.nanmean(image)) / np.nanstd(image)  # standardize the data
 
     T = _find_gaussian_multiplier(pfa)
 
-    edge_mean = fast_edge_mean(image, mask)
-    egde_std = fast_edge_std(image, mask)
+    edge_mean = fast_edge_mean(image, mask, wi, wo)
+    egde_std = fast_edge_std(image, mask, wi, wo)
 
     Δ = (image > (edge_mean + T * egde_std))
 
