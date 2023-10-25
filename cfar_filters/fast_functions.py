@@ -113,7 +113,7 @@ def _edge_kernel_std(x, m, ri, ro):
 # def fast_edge_mean(x, m):
 #     return _edge_kernel_mean(x, m)
 
-# ignore nans - TODO: make this a choice in all functions
+
 @nb.jit('float32[:,:](float32[:,:], boolean[:,:], u2, u2)', parallel=True, nopython=True)
 def fast_edge_nanmean(x, m):
     return _edge_kernel_mean(x, m)
