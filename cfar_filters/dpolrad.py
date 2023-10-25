@@ -129,7 +129,6 @@ def detector(image, mask=0, pfa=1e-12, test_window=3, train_window=40):
 
     outliers = (idpolrad > T)
 
-    outliers = mask_edges(Δ, 20, False)
-
+    outliers = mask_edges(outliers, 20, False)
 
     return outliers
