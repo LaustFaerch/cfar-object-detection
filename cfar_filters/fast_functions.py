@@ -4,7 +4,7 @@ Fast convolutions using NUMBA
 
 Window sizes can be varied using the wi/wo parameters, but maximum allowable window sie is 41x41 pixels.
 This might not be suitable for e.g., very high resolution SAR images.
-It might be nescessary to change the window sizes for some applications (e.g., very high res images). 
+It might be nescessary to change the window sizes for some applications (e.g., very high res images).
 However, increasing the window sizes will increase computational cost with O^2.
 
 """
