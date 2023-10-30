@@ -109,7 +109,7 @@ def detector(image, mask=0, pfa=1e-12, test_window=3, train_window=40):
     idpolrad = np.where(np.isnan(idpolrad), 0, idpolrad)
 
     # estimate the parameters for the generalized gamma distribution
-    # exclude values smaller than 50 x mean and larger than 0
+    # exclude values larger than 50 x mean and smaller than 0
     # using all samples is very slow - so we estimate the parameters based on a random subset
     N = 10000
     np.random.seed(0)  # seed random state so same pixels are used each time

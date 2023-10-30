@@ -124,7 +124,8 @@ array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ```
 
 With the center pixel 'X' being compared against all pixels marked with '1', and '0' being the guard area.
-The maximum supported diameter is 20. If wo is set to a value larger than 20, the CFAR window will be cropped to a square of size 41x41. This is to restrict computational cost as the filter calculations is implemented using Numba.
+As a rule of thumb, wi should be twice the size of the objects you are looking for (to avoid targets contaminating the clutter estimation area). Larger wo means more samples for estimating the background clutter distribution, but wo should not be chosen so large that neighboring targets are included in the clutter estimation as these may contaminate.
+The maximum supported diameter is 41. If wo is set to a value larger than 41, the CFAR window will be cropped to a square of size 41x41. This is to restrict computational cost as the filter calculations is implemented using Numba.
 
 NB: The code will use all available CPU power. Keep this in mind when your CPU goes to 100%. 
 
