@@ -150,7 +150,7 @@ I. H. Soldal, W. Dierking, A. A. Korosov, and A. Marino, “Automatic detection 
 
 If using this, please use the following citation:
 
-Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: A Comparison of CFAR Object Detection Algorithms for Iceberg Identification in L- and C-band SAR Imagery of the Labrador Sea, The Cryosphere Discuss. [preprint], https://doi.org/10.5194/tc-2023-17, in review, 2023. 
+Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: A comparison of constant false alarm rate object detection algorithms for iceberg identification in L- and C-band SAR imagery of the Labrador Sea, The Cryosphere, 17, 5335–5355, https://doi.org/10.5194/tc-17-5335-2023, 2023. 
 
 ## License
 The material is made available under the GNU General Public License v3.0: Copyright 2023, Laust Færch, of CIRFA - The Arctic University of Norway, UiT. All rights reserved.

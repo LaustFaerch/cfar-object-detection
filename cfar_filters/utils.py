@@ -55,7 +55,7 @@ def calc_enl(samples):
     """
     return np.nanmean(samples)**2 / np.nanstd(samples)**2
 
-
+# TODO: this function should use the mask and only calculate statistics within the valid area.
 def smells_like(image, K=1000):
     """
     Often, SAR images are visualized in decibel scale.
