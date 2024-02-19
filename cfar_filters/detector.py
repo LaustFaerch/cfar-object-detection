@@ -148,6 +148,7 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         image = utils.db2in(image)
         nis_transform = normsum.transform(image, mask=mask, wi=wi, wo=wo)
         nis_enl = utils.calc_enl(np.where(nis_transform < np.nanmedian(nis_transform) * 2, nis_transform, np.nan))
+        warnings.filterwarnings('ignore') # supress warnings for the gamma detector - all checks already made in normsum.transform
         outliers = gamma.detector(nis_transform, mask=mask, pfa=pfa, enl=nis_enl, wi=wi, wo=wo)
 
     elif detector == 'idpolrad':
