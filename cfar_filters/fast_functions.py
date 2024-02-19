@@ -31,7 +31,6 @@ def _edge_kernel_mean(x, m, ri, ro):
     else:
         return nb.float32(np.nan)
 
-# Corresponding to outer_window_size==15
 @nb.stencil(neighborhood=((-20, 20), (-20, 20)))
 def _edge_kernel_std(x, m, ri, ro):
 
