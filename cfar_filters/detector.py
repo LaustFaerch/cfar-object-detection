@@ -87,7 +87,7 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
     # check datatypes are correct
     if (not isinstance(image, np.ndarray)) | (image.dtype != np.float32):
         raise TypeError(f'Input image must be of type np.ndarray(float32) but is of type {type(image)}, {image.dtype}')
-    if (not isinstance(mask, np.ndarray)) | (mask.dtype != np.bool):
+    if (not isinstance(mask, np.ndarray)) | (mask.dtype != bool):
         raise TypeError(f'Input mask must be of type np.ndarray(bool) but is of type {type(mask)}, {mask.dtype}')
 
     # check dimensions of image
