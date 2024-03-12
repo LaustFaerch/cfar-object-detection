@@ -20,8 +20,9 @@ def k_pdf(x, μ, v, L):
 
     a = 2 / (gamma(L) * gamma(v))
     b = (L * v / μ)**((L + v) / 2)
-    c = x**((L + v - 2) / 2)  # TODO: supress RuntimeWarning: invalid value encountered in double_scalars
-    d = kn(n, 2 * np.sqrt(L * v * x / μ))  # TODO: supress RuntimeWarning: invalid value encountered in sqrt
+
+    c = x**((L + v - 2) / 2)
+    d = kn(n, 2 * np.sqrt(L * v * x / μ))
 
     if np.any(np.array([a, b, c, d]) == 0):
         return 0
@@ -117,7 +118,11 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
     egde_var = fast_edge_std(image, mask, wi, wo)**2
 
     # MoM estimation of the order parameter (v)
-    order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="invalid value encountered in divide")
+        warnings.filterwarnings("ignore", message="divide by zero encountered in divide")
+        order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
+
     order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-20
     order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-20
 
