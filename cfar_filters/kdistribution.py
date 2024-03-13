@@ -112,7 +112,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
 
     # large v means gamma distributed clutter. v cannot be negative
     vmin, vmax = 1, 20
-    N = 25 # number of steps in the LuT
+    N = 40 # number of steps in the LuT
 
     # calculate the LUT based on the PFA and ENL
     v_lut = pd.DataFrame(columns=['v'])
