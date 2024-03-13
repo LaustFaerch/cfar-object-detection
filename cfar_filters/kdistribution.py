@@ -14,6 +14,10 @@ from .fast_functions import fast_edge_mean, fast_edge_std
 # C. Oliver and S. Quegan, Understanding synthetic aperture radar images, vol. 53, no. 9. 1997.
 def k_pdf(x, μ, v, L):
 
+    # intensities cannot be negative
+    if x < 0:
+        return 0
+
     v = np.float64(v)
     x = np.float64(x)
     n = np.round(v - L)  # order of bessel function must be integer
@@ -34,12 +38,16 @@ def k_pdf(x, μ, v, L):
 # Numerical integration of the k-distribution using scipy.integrate
 # I cannot find a nice expression for the CDF, so i'm using the pdf instead.
 def _k_minimize(t, μ, v, L, pde):
+    # NB: rounding v and L here avoids issues in k_pdf when the order of the bessel function becomes very large
     return np.abs(integrate.quad(k_pdf, 0, t, args=(μ, np.round(v), np.round(L)))[0] - pde)
 
 # Get K-CFAR threshold
 def get_threshold(row, enl, pfa):
     v = row['v']
     pde = 1 - pfa
+    # we assume unit intensity (μ=1), then the threshold will be determined later as T*μ
+    # See Tunaley, J.K.E., 2010. K-distribution algorithms. Autom. Remote Control 67, 1251–1264. https://doi.org/10.1134/S0005117906080054
+    # and Brekke, C., 2009. Automatic ship detection based on satellite SAR. FFI-rapport 2008/00847
     T = np.round(fmin(_k_minimize, 5, disp=False, args=(1, v, enl, pde))[0], 2)
     return np.round(T, 2)
 
@@ -118,10 +126,7 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
     egde_var = fast_edge_std(image, mask, wi, wo)**2
 
     # MoM estimation of the order parameter (v)
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="invalid value encountered in divide")
-        warnings.filterwarnings("ignore", message="divide by zero encountered in divide")
-        order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
+    order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
 
     order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-20
     order_param = np.where(order_param > vmax, vmax, order_param)  # clip order parameter from 1-20
