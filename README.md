@@ -6,7 +6,7 @@ Developed for detecting icebergs in Sentinel-1 and ALOS-2 imagery.
 Implemented using Numba for fast parallel convolutions.
  
 ## Overview
-Includes 5 different CFAR detectors and contrast enhancement techniques for iceberg detection:
+Includes 6 different CFAR detectors and contrast enhancement techniques for iceberg detection:
 * Wishart (K. Conradsen 2003)
 * Log-normal (D. J. Crisp 2004)
 * Gamma (D. J. Crisp 2004)
@@ -26,7 +26,7 @@ import rasterio as rio
 import cfar_filters as cfar
 
 # load your SAR image as a numpy array
-# image format should be a numpy.ndarray(float32) of shape (2,X,Y) with the order: HH, HV
+# image format should be a numpy.ndarray(float32) of shape (X,Y) with the order: HH, HV
 image_filename = Path('sentinel1-image.tif')
 with rio.open(image_filename) as src:
     in_image = src.read()

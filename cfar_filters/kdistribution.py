@@ -52,7 +52,7 @@ def get_threshold(row, enl, pfa):
     return np.round(T, 2)
 
 
-def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
+def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     """
     CFAR filter implementation based on the K-normal distribution.
 
@@ -68,7 +68,6 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
     To speed up execution, a look-up table of thresholds based on min/max order parameters are calculated first.
     This is similar to the method suggested by C. Brekke:
     C. Brekke, Automatic ship detection based on satellite SAR, no. May. 2009.
-    The threshold is calculated at predefined steps, which are set by the N parameter. Higher N means finer increments.
     We do not interpolate from the LUT, but uses the nearest suitable value.
     The order parameter (v) is clipped between 1-20. This is based on the observed range of the parameter but might need
     refinement for other images.
@@ -79,8 +78,6 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
         SAR image in linear intensity format
     mask : numpy.ndarray(bool) (X,Y)
         Mask for the image.
-    N : Integer
-        Number of v-estimations
     pfa : float
         Probability of false alarm. Should be somewhere between 0-1
     enl : float
@@ -115,6 +112,7 @@ def detector(image, mask=0, N=40, pfa=1e-12, enl=10, wi=9, wo=15):
 
     # large v means gamma distributed clutter. v cannot be negative
     vmin, vmax = 1, 20
+    N = 25 # number of steps in the LuT
 
     # calculate the LUT based on the PFA and ENL
     v_lut = pd.DataFrame(columns=['v'])
