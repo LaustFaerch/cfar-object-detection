@@ -20,6 +20,12 @@ Includes 6 different CFAR detectors and contrast enhancement techniques for iceb
 
 The implementation have been tested on Sentinel-1 EW and IW, ALOS-2 Wide Beam, and ICEYE Stripmap images.
 
+## Usage
+
+See the examples.ipynb for how to use the library
+Test files are found in te folder test-files
+
+
 ## Notes
 
 The CFAR clutter estimation windows are round and hollow. Similar to the implementation in this paper, with the exception that the target area is always a single pixel: https://www.researchgate.net/figure/Schematic-of-the-target-guard-and-background-areas-used-in-the-traditional-CFAR_fig1_350936854
