@@ -127,6 +127,7 @@ def detector(image, mask=0, pfa=1e-12, enl=10, wi=9, wo=15):
     with warnings.catch_warnings():
         # we don't want to raise warnings when dividing with nan
         warnings.filterwarnings("ignore", message="invalid value encountered in divide")
+        warnings.filterwarnings("ignore", message="divide by zero encountered in divide")
         order_param = edge_mean**2 * (enl + 1) / np.where(mask, (egde_var * enl - edge_mean**2), np.nan)
 
     order_param = np.where(order_param < vmin, vmin, order_param)  # clip order parameter from 1-20
