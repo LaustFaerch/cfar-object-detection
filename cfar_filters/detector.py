@@ -29,7 +29,7 @@ import numpy as np
 from .utils import smells_like
 from . import kdistribution, lognormal, wishart, normsum, dpolrad, gamma, utils
 
-def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, sensitivity=40, wi=9, wo=15):
+def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize=2, wi=9, wo=15):
     """
     Run CFAR detection on dual-band SAR data
 
@@ -49,8 +49,6 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         Equivalent Number of Looks of the SAR image. Typically between 5-20 depending on the sensor
     minsize : integer
         Objects this size or smaller are assumed to be noise and are removed.
-    sensitiviy : integer
-        Number of v-estimations for the K detector LUT. Larger number means slower but more precise calculations.
     wi : integer
         Inner Window Diameter - also called guard area
     wo : integer
@@ -127,16 +125,16 @@ def run(image, mask, detector='gamma', method='AND', pfa=1e-9, enl=10.7, minsize
         image = utils.db2in(image)
 
         if method == 'AND':
-            hh_outliers = kdistribution.detector(image[0, ...], mask=mask, N=sensitivity,
+            hh_outliers = kdistribution.detector(image[0, ...], mask=mask, 
                                                  pfa=np.sqrt(pfa), enl=enl, wi=wi, wo=wo)
-            hv_outliers = kdistribution.detector(image[1, ...], mask=mask, N=sensitivity,
+            hv_outliers = kdistribution.detector(image[1, ...], mask=mask, 
                                                  pfa=np.sqrt(pfa), enl=enl, wi=wi, wo=wo)
             outliers = hh_outliers & hv_outliers
 
         elif method == 'OR':
-            hh_outliers = kdistribution.detector(image[0, ...], mask=mask, N=sensitivity,
+            hh_outliers = kdistribution.detector(image[0, ...], mask=mask, 
                                                  pfa=1 - np.sqrt(1 - pfa), enl=enl, wi=wi, wo=wo)
-            hv_outliers = kdistribution.detector(image[1, ...], mask=mask, N=sensitivity,
+            hv_outliers = kdistribution.detector(image[1, ...], mask=mask, 
                                                  pfa=1 - np.sqrt(1 - pfa), enl=enl, wi=wi, wo=wo)
             outliers = hh_outliers | hv_outliers
 
