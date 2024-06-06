@@ -84,7 +84,7 @@ I. H. Soldal, W. Dierking, A. A. Korosov, and A. Marino, “Automatic detection 
 
 If using this, please use the following citation:
 
-Færch, L., Hietanen, Panu., (2024). CFAR Object Detection, Version 3, GitHub repository, https://github.com/LaustFaerch/cfar-object-detection, DOI:10.5281/zenodo.11504039. 
+Færch, L., Hietanen, P., (2024). CFAR Object Detection, Version 3, GitHub repository, https://github.com/LaustFaerch/cfar-object-detection, DOI:10.5281/zenodo.11504039. 
 
 or with bibtex:
 
