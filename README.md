@@ -88,6 +88,7 @@ Færch, L. CFAR Object Detection, Version 3, GitHub repository, https://github.c
 
 or with bibtex:
 
+```Python
 @misc{cfar-object-detection,
   author = {Færch, Laust},
   title = {CFAR Object Detection},
@@ -96,6 +97,7 @@ or with bibtex:
   doi: 10.5281/zenodo.11504039 
   date = {2024-06-06},
 }
+```
 
 ## License
 The material is made available under the GNU General Public License v3.0: Copyright 2023, Laust Færch, of CIRFA - The Arctic University of Norway, UiT. All rights reserved.
