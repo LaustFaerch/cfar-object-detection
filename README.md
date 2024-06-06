@@ -22,8 +22,7 @@ The implementation have been tested on Sentinel-1 EW and IW, ALOS-2 Wide Beam, a
 
 ## Usage
 
-See the examples.ipynb for how to use the library
-Test files are found in te folder test-files
+See the examples.ipynb for examples of how to use the library.
 
 
 ## Notes
@@ -85,7 +84,18 @@ I. H. Soldal, W. Dierking, A. A. Korosov, and A. Marino, “Automatic detection 
 
 If using this, please use the following citation:
 
-Færch, L., Dierking, W., Hughes, N., and Doulgeris, A. P.: A comparison of constant false alarm rate object detection algorithms for iceberg identification in L- and C-band SAR imagery of the Labrador Sea, The Cryosphere, 17, 5335–5355, https://doi.org/10.5194/tc-17-5335-2023, 2023. 
+Færch, L. CFAR Object Detection, Version 3, GitHub repository, https://github.com/LaustFaerch/cfar-object-detection, DOI:10.5281/zenodo.11504039, 2024. 
+
+or with bibtex:
+
+@misc{cfar-object-detection,
+  author = {Færch, Laust},
+  title = {CFAR Object Detection},
+  url = {https://github.com/LaustFaerch/cfar-object-detection},
+  version = {3},
+  doi: 10.5281/zenodo.11504039 
+  date = {2024-06-06},
+}
 
 ## License
 The material is made available under the GNU General Public License v3.0: Copyright 2023, Laust Færch, of CIRFA - The Arctic University of Norway, UiT. All rights reserved.
