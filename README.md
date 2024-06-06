@@ -91,10 +91,10 @@ or with bibtex:
 ```Python
 @misc{cfar-object-detection,
   author = {Færch, Laust},
-  title = {CFAR Object Detection},
+  title = {{CFAR Object Detection}},
   url = {https://github.com/LaustFaerch/cfar-object-detection},
   version = {3},
-  doi: 10.5281/zenodo.11504039 
+  doi = {10.5281/zenodo.11504039},
   date = {2024-06-06},
 }
 ```
