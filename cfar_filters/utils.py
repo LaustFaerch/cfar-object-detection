@@ -1,6 +1,8 @@
+import functools
 import numpy as np
 import pandas as pd
 from skimage import morphology
+from skimage.transform import downscale_local_mean, resize
 
 def db2in(image):
     """
@@ -141,3 +143,43 @@ def mask_edges(image, N, fill=False):
     image[:, -N:] = fill
 
     return image
+
+
+def multiscale(func):
+    """
+    Multiscale processing decorator
+    Apply binary image filters to several downsampled versions of the original image.
+    Tailored for the CFAR detector format, i.e., cfar(image, mask, init)[outliers]
+    
+    Use as:
+    @multiscale
+    def multiscale_cfar(image, mask, init):
+        return cfar.detector.run(image, mask, **init)
+    
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+
+        image = kwargs['image']
+        mask = kwargs['mask']
+        init = kwargs['init']
+        levels = kwargs['levels']
+        
+        outliers = func(image, mask, init)
+        
+        N = 2**np.linspace(1, levels, levels).astype(int)
+
+        for level in N:
+            
+            image_downsampled = in2db(downscale_local_mean(db2in(image), (1, level, level))) # downscale using the local mean in linear intensity
+            mask_downsampled = downscale_local_mean(mask, (level, level))>0
+            
+            # apply detector to the downscaled image
+            outliers_downsampled = func(image_downsampled, mask_downsampled, init)*1 # *1 for conversion to int8
+            # upsample the results and merge with the previous iteration
+            outliers_upsampled = resize(outliers_downsampled, outliers.shape, anti_aliasing=False, preserve_range=True)
+            outliers = outliers + outliers_upsampled
+
+        return outliers
+
+    return wrapper
