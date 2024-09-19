@@ -80,6 +80,10 @@ A. Marino, W. Dierking, and C. Wesche, “A Depolarization Ratio Anomaly Detecto
 
 I. H. Soldal, W. Dierking, A. A. Korosov, and A. Marino, “Automatic detection of small icebergs in fast ice using satellite Wide-Swath SAR images,” Remote Sens., vol. 11, no. 7, pp. 1-24, 2019, doi: 10.3390/rs11070806.
 
+ALOS-2/PALSAR-2 data are provided by JAXA through the 2019 to 2022 mutual cooperation project between ESA and JAXA on Using Synthetic Aperture Radar Satellites in Earth Science and Applications.
+
+Satellite images from the Sentinel-1 satellite constellation can be accessed through the Copernicus dataspace: https://dataspace.copernicus.eu/
+
 ## Cite
 
 If using this, please use the following citation:
